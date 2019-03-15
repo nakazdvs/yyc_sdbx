@@ -100,18 +100,10 @@ header {
 #wrap {
   #photoGallery {
     #mainPhoto {
-      //position: relative;
-      //height: 100vw;
-      //overflow-x: hidden;
       .main-photo-swiper {
-        //width: 100%;
-        //height: 100%;
-        //width: 100vw;
-        //height: 100vw;
         width: 100%;
         overflow-x: hidden;
         .item {
-          //height: 100vw;
           img {
             width: 100%;
           }
