@@ -111,12 +111,12 @@ header .menu_list.open {
 }
 
 #wrap #photoGallery #mainPhoto {
+  height: 100vw;
   overflow-x: hidden;
 }
 
-#wrap #photoGallery #mainPhoto .main-photo-swiper {
-  width: 100%;
-  height: 100%;
+#wrap #photoGallery #mainPhoto .main-photo-swiper .item {
+  height: 100vw;
 }
 
 #wrap #photoGallery #mainPhoto .main-photo-swiper .item img {
