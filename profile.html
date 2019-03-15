@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>モーフィング</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.4.6/css/swiper.min.css">
+<link rel="stylesheet" href="./css/photoswipe.css">
+<link rel="stylesheet" href="./css/default-skin.css">
+<link href="./css/profile.css" rel="stylesheet">
+</head>
+<body class="is_ios_safari">
+
+<div id="container">
+<main id="main">
+
+  <header id="header">
+    <div id="header_bar">
+      <div class="back" id="back"></div>
+      <div class="menu" id="show"></div>
+    </div>
+    <div class="menu_list" :class="changeOpen" id="menu"><ul>
+    <li><a href="http://livedoor.com">my</a></li>
+    <li><a href="http://livedoor.com">message</a></li>
+    <li><a href="http://livedoor.com">search</a></li>
+    <li><a href="http://livedoor.com">bbs</a></li>
+    </ul></div>
+  </header>
+
+  <div id="wrap">
+  <div id="photoGallery">
+    <div id="mainPhoto">
+      <div class="main-photo-swiper">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide item"><img src="./img/profile_01_thumb.jpg"></div>
+          <div class="swiper-slide item"><img src="./img/profile_02_thumb.jpg"></div>
+          <div class="swiper-slide item"><img src="./img/profile_03_thumb.jpg"></div>
+          <div class="swiper-slide item"><img src="./img/profile_04_thumb.jpg"></div>
+          <div class="swiper-slide item"><img src="./img/profile_05_thumb.jpg"></div>
+          <div class="swiper-slide item"><img src="./img/profile_06_thumb.jpg"></div>
+          <div class="swiper-slide item"><img src="./img/profile_07_thumb.jpg"></div>
+          <div class="swiper-slide item"><img src="./img/profile_08_thumb.jpg"></div>
+          <div class="swiper-slide item"><img src="./img/profile_09_thumb.jpg"></div>
+          <div class="swiper-slide item"><img src="./img/profile_10_thumb.jpg"></div>
+        </div>
+      </div>
+    </div>
+    <div id="subphoto">
+      <div class="sub-photo-swiper">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide item open focus"><img src="./img/profile_01_thumb.jpg" @click="swipeImg"></div>
+          <div class="swiper-slide item open"><img src="./img/profile_02_thumb.jpg" @click="swipeImg"></div>
+          <div class="swiper-slide item open"><img src="./img/profile_03_thumb.jpg" @click="swipeImg"></div>
+          <div class="swiper-slide item open"><img src="./img/profile_04_thumb.jpg" @click="swipeImg"></div>
+          <div class="swiper-slide item open"><img src="./img/profile_05_thumb.jpg" @click="swipeImg"></div>
+          <div class="swiper-slide item open"><img src="./img/profile_06_thumb.jpg" @click="swipeImg"></div>
+          <div class="swiper-slide item open"><img src="./img/profile_07_thumb.jpg" @click="swipeImg"></div>
+          <div class="swiper-slide item open"><img src="./img/profile_08_thumb.jpg" @click="swipeImg"></div>
+          <div class="swiper-slide item open"><img src="./img/profile_09_thumb.jpg" @click="swipeImg"></div>
+          <div class="swiper-slide item open"><img src="./img/profile_10_thumb.jpg" @click="swipeImg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="mainPhotoBox" style="background-image:url(./img/profile_01.jpg);"></div>
+  <div id="mainPhotoBox" style="background-image:url(./img/profile_02.jpg);"></div>
+
+  <div id="bbsStatusWrap" v-scroll="reachScroll">
+    <div class="statusBody is_play">
+      <dl class="body">
+        <dt class="label"><strong>今から遊べる人</strong></dt>
+        <dd class="text"><b>今日、飲みに行きませんか？</b></dd>
+        <dd class="area">東京 渋谷 池袋 新宿</dd>
+      </dl>
+      <div class="distance" id="distanceCircle"><distance-circle ref="circle" last="18"></distance-circle><span class="baseCircle" data-distance="18"></span></div>
+    </div>
+  </div>
+  <div id="mainPhotoBox" style="background-image:url(./img/profile_03.jpg);"></div>
+  <div id="mainPhotoBox" style="background-image:url(./img/profile_01.jpg);"></div>
+  </div>
+
+</main>
+
+<div id="fixedDrawer" :class="changeSetRiseup">
+  <div id="templateBpx" class="templateBox" :class="toggleClose" v-if="isIosChromeTmp"><span @touchstart="slideUpTemplate" class="templateBtn"></span>
+    <div class="wrap">
+      <div class="templateBody">
+        <div class="swiper-container">
+            <div class="swiper-wrapper">
+              <div class="swiper-slide templateItems">
+                <dl>
+                  <dt>写真が素敵（例文1）</dt>
+                  <dd>はじめまして！まりかといいます(^_^)プロフィールを見て素敵な方だとおもいました〜♪
+                  よろしくおねがいします！仲良くしてくださいね♪</dd>
+                </dl>
+              </div>
+              <div class="swiper-slide templateItems">
+                <dl>
+                  <dt>写真が素敵（例文2）</dt>
+                  <dd>はじめまして！まりかといいます(^_^)プロフィールを見て素敵な方だとおもいました〜♪
+                  よろしくおねがいします！仲良くしてくださいね♪</dd>
+                </dl>
+              </div>
+              <div class="swiper-slide templateItems">
+                <dl>
+                  <dt>写真が素敵（例文3）</dt>
+                  <dd>はじめまして！まりかといいます(^_^)プロフィールを見て素敵な方だとおもいました〜♪
+                  よろしくおねがいします！仲良くしてくださいね♪</dd>
+                </dl>
+              </div>
+            </div>
+            <div class="swiper-pagination templatePaginate"></div>
+        </div>
+      </div>
+      <div class="insertBtn"><a href="">このメッセージを使う</a></div>
+    </div>
+  </div>
+  <div  class="messageBox" :class="setIsRiseup" v-if="isIosChrome">
+    chrome
+  </div>
+  <div id="messageBox" class="messageBox" :class="setIsRiseup" v-else>
+    <div class="special"><span class="icon"></span></div>
+    <div class="input"><div class="textareaWrap"><computed-textarea></computed-textarea></div></div>
+    <div class="send"><input type="submit" value="送信"></div>
+  </div>
+</div>
+
+
+</div><!--/container-->
+
+<div id="pswp-mount"></div>
+
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.4.6/js/swiper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.6/dist/vue.js"></script>
+<script src="./js/smoothscroll.min.js"></script>
+<script src="./js/photoswipe.js" charset="utf-8"></script>
+<script src="./js/photoswipe-ui-default.js" charset="utf-8"></script>
+<!--script src="./js/photoswipe-simplify.js" charset="utf-8"></script-->
+<script>
+'use strict';
+
+
+var ua = window.navigator.userAgent.toLowerCase();
+var is_ios_safari = (ua.indexOf('iphone') !== -1 && ua.indexOf('safari') !== -1 && ua.indexOf('crios') === -1 && ua.indexOf('edge') === -1);
+var is_ios_chrome = (ua.indexOf('iphone') !== -1 && ua.indexOf('safari') !== -1 && ua.indexOf('crios') !== -1 && ua.indexOf('edge') === -1);
+
+function _setIosSafari() {
+  const html = document.querySelector('html');
+  const body = document.body;
+  const _setHeight = function() {
+    const winH = window.innerHeight;
+    container.style.height = winH + 'px';
+    main.style.height = winH + 'px';
+  }
+  if (is_ios_safari){
+    _setHeight();
+  } else {
+    body.classList.remove('is_ios_safari');
+    body.classList.add('is_else_browser');
+  }
+}
+_setIosSafari()
+const Pswp = Vue.extend({
+  template: `<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true"><div class="pswp__bg"></div><div class="pswp__scroll-wrap"><div class="pswp__container"><div class="pswp__item"></div><div class="pswp__item"></div><div class="pswp__item"></div></div><div class="pswp__ui pswp__ui--hidden"><div class="pswp__top-bar"><div class="pswp__counter"></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button><button class="pswp__button pswp__button--share" title="Share"></button><button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button><button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class="pswp__preloader"><div class="pswp__preloader__icn"><div class="pswp__preloader__cut"><div class="pswp__preloader__donut"></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class="pswp__share-tooltip"></div> </div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button><button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class="pswp__caption"><div class="pswp__caption__center"></div></div></div></div></div>`,
+})
+new Pswp().$mount('#pswp-mount')
+function _settingPhotoSwipe(){
+  new Vue({
+    el: '#photoGallery',
+    data: {
+      pswpElement: document.querySelectorAll('.pswp')[0],
+      items: [
+        {
+          src: './img/profile_01.jpg',
+          w: 750,
+          h: 1085
+        },
+        {
+          src: './img/profile_02.jpg',
+          w: 500,
+          h: 620
+        },
+        {
+          src: './img/profile_03.jpg',
+          w: 402,
+          h: 711
+        },
+        {
+          src: './img/profile_04.jpg',
+          w: 728,
+          h: 863
+        },
+        {
+          src: './img/profile_05.jpg',
+          w: 750,
+          h: 1090
+        },
+        {
+          src: './img/profile_06.jpg',
+          w: 660,
+          h: 395
+        },
+        {
+          src: './img/profile_07.jpg',
+          w: 607,
+          h: 480
+        },
+        {
+          src: './img/profile_08.jpg',
+          w: 605,
+          h: 827
+        },
+        {
+          src: './img/profile_09.jpg',
+          w: 564,
+          h: 488
+        },
+        {
+          src: './img/profile_10.jpg',
+          w: 1200,
+          h: 1200
+        },
+      ],
+      options: {
+        index: '',
+        loop: false
+      },
+      myMainSwiper : '',
+      mySubSwiper : '',
+    },
+    mounted() {
+      this.options.index = 0;
+      this.setMainSwiper();
+      this.setSubSwiper();
+    },
+    methods: {
+      galleryStart() {
+        var pswp = new PhotoSwipe( this.pswpElement, PhotoSwipeUI_Default, this.items, this.options);
+        pswp.init();
+        pswp.listen('afterChange', function() {
+          const idx = pswp.getCurrentIndex();
+          this.changePhoto(idx);
+          this.options.index = idx;
+          this.mySubSwiper.slideTo(idx,0)
+
+          const items = Array.prototype.slice.call(subphoto.querySelectorAll('.item.open img'));
+          this.changeSubPhoto(items, items[idx]);
+
+        }.bind(this));
+      },
+      setMainSwiper(){
+        const myMainSwiper = new Swiper('.main-photo-swiper',{
+          speed: 300,
+        })
+        this.myMainSwiper = myMainSwiper;
+        myMainSwiper.on('slideNextTransitionEnd',function(){
+          const items = Array.prototype.slice.call(subphoto.querySelectorAll('.item.open img'));
+          const idx = myMainSwiper.activeIndex;
+          this.changeSubPhoto(items, items[idx]);
+          this.options.index = idx;
+        }.bind(this))
+        myMainSwiper.on('slidePrevTransitionEnd',function(){
+          const items = Array.prototype.slice.call(subphoto.querySelectorAll('.item.open img'));
+          const idx = myMainSwiper.activeIndex;
+          this.changeSubPhoto(items, items[idx]);
+          this.options.index = idx;
+        }.bind(this))
+        myMainSwiper.on('tap',function(){
+          this.galleryStart();
+        }.bind(this))
+      },
+      setSubSwiper(){
+        const mySubSwiper = new Swiper('.sub-photo-swiper',{
+          slidesPerView: 5.5,
+          spaceBetween: 8,
+          freeMode: true,
+        })
+        this.mySubSwiper = mySubSwiper;
+      },
+      swipeImg(e) {
+        const el = e.target;
+
+        const items = Array.prototype.slice.call(subphoto.querySelectorAll('.item.open img'));
+        const idx = items.indexOf(el);
+        this.changePhoto(idx);
+        this.options.index = idx;
+
+        this.changeSubPhoto(items, el);
+      },
+      changePhoto(i) {
+        this.myMainSwiper.slideTo(i,0)
+      },
+      changeSubPhoto(array,el){
+        const filter_array = array.filter(function(item){
+          return item != el;
+        })
+        filter_array.forEach(function(fitm){
+          fitm.parentNode.classList.remove('focus');
+        })
+        el.parentNode.classList.add('focus');
+      }
+    },
+  })
+}
+_settingPhotoSwipe()
+
+
+function _menu() {
+  new Vue({
+    el: '#header',
+    data: {
+      changeOpen : {
+        open: false
+      }
+    },
+    mounted() {
+      document.addEventListener('touchstart',this.fadeInMenu);
+    },
+    methods: {
+      fadeInMenu(e) {
+        const target = e.target;
+        const is_id_show = (target.closest('#show') != null);
+        const is_id_menu = (target.closest('#menu') != null);
+        if ( ! (is_id_show || is_id_menu) ) {
+          this.changeOpen.open = false;
+        } else {
+          this.changeOpen.open =! this.changeOpen.open;
+        }
+      }
+    }
+  });
+}
+_menu()
+
+Vue.directive('scroll', {
+  inserted: function(el, binding) {
+    const element = is_ios_safari ? main : window;
+    let f = function(evt) {
+      if (binding.value(evt, el)) {
+        element.removeEventListener('scroll', f)
+      }
+    }
+    element.addEventListener('scroll',f)
+  }
+})
+Vue.component('distance-circle',{
+  props: ['last'],
+  template: `
+    <svg class="distanceCircle"><circle></circle></svg>
+  `,
+  mounted() {},
+  methods: {
+    setCircleAnimation(){
+      const v = this.$el.getBoundingClientRect();
+      const l = this.$props.last;
+      const rect_width = v.width;
+      const pi = Math.round(rect_width * 3.14);
+      const arc_calc = (pi / 24) * (24 - l);
+      const arc = Math.round(arc_calc);
+      const style = document.createElement('style');
+      style.innerText =
+      '#bbsStatusWrap .statusBody .distance .distanceCircle circle{animation: circle 1s forwards}' +
+      '@keyframes circle{0% {stroke:#ccc;stroke-dasharray:0 ' + pi + '}100% {stroke:#ccc;stroke-dasharray:' + arc + ' ' + pi + '}}';
+      const head = document.getElementsByTagName('head');
+      head.item(0).appendChild(style);
+    },
+  }
+})
+new Vue({
+  el: '#bbsStatusWrap',
+  data: {
+    bbsWrapHeight: document.querySelector('#bbsStatusWrap .statusBody').getBoundingClientRect().height,
+    drawerHeight: Math.ceil(25.1 * 3.75),
+    count: '0'
+  },
+  methods: {
+    reachScroll(evt,el) {
+      if(this.count < 1) {
+        const bbsWrapTop = document.querySelector('#bbsStatusWrap .statusBody').getBoundingClientRect().top;
+        const windowH = window.innerHeight;
+        const scroll_elm = is_ios_safari ? evt.target : document.body;
+        const scroll = scroll_elm.scrollTop;
+        const calc = bbsWrapTop + this.bbsWrapHeight + scroll + this.drawerHeight - windowH;
+        const position = Math.floor(calc);
+        if (scroll >= position) {
+          this.$refs.circle.setCircleAnimation();
+          this.count =+ 1;
+        }
+      } else {
+        return;
+      }
+    }
+  }
+})
+
+function _fixedDrawer() {
+  Vue.component('computed-textarea',{
+    template: '<textarea :rows="rows" placeholder="メッセージしてみよう" v-model="value"></textarea>',
+    data() {
+      return {
+        value: '',
+      }
+    },
+    computed: {
+      rows() {
+        let num = this.value.split('\n').length;
+        return (num > 3) ? 3 : num;
+      },
+    },
+    methods: {}
+  })
+  new Vue({
+    el: '#fixedDrawer',
+    data: {
+      changeSetRiseup: {
+        hidden: true,
+        riseup: false
+      },
+      /*
+      isIosTransrate: {
+        is_ios: false
+      },
+      */
+      toggleClose: {
+        close: true
+      },
+      setIsRiseup: {
+        is_riseup: true
+      },
+      inputCheckIos: false
+    },
+    mounted() {
+      this.$nextTick(function(){
+        this.changeSetRiseup.riseup = true;
+        this.animationEnd();
+      });
+      this.setSwiper();
+    },
+    computed: {
+      isIosChrome() {
+        return is_ios_chrome;
+      },
+      isIosChromeTmp() {
+        return !is_ios_chrome;
+      }
+    },
+    methods: {
+      animationEnd() {
+        this.$el.addEventListener('animationend',function(){
+          this.changeSetRiseup.hidden = false;
+          this.changeSetRiseup.riseup = false;
+          this.setIsRiseup.is_riseup = false;
+        }.bind(this));
+      },
+      slideUpTemplate(e) {
+        this.toggleClose.close =! this.toggleClose.close;
+        e.stopPropagation();
+        e.preventDefault();
+      },
+      setSwiper() {
+        new Swiper('.swiper-container',{
+          pagination: {
+            el: '.swiper-pagination'
+          }
+        })
+      },
+    }
+  });
+}
+_fixedDrawer()
+
+</script>
+</body>
+</html>
