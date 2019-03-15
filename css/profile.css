@@ -110,6 +110,10 @@ header .menu_list.open {
   margin-bottom: 50px;
 }
 
+#wrap #photoGallery #mainPhoto .main-photo-swiper {
+  overflow-x: hidden;
+}
+
 #wrap #photoGallery #mainPhoto .main-photo-swiper .item img {
   width: 100%;
 }
