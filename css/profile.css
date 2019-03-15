@@ -111,7 +111,6 @@ header .menu_list.open {
 }
 
 #wrap #photoGallery #mainPhoto {
-  position: relative;
   overflow-x: hidden;
 }
 
