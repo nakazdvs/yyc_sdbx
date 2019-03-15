@@ -115,6 +115,12 @@ header .menu_list.open {
   overflow-x: hidden;
 }
 
+#wrap #photoGallery #mainPhoto .main-photo-swiper {
+  width: 100vw;
+  height: 100vw;
+  overflow: hidden;
+}
+
 #wrap #photoGallery #mainPhoto .main-photo-swiper .item {
   height: 100vw;
 }
