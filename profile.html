@@ -254,6 +254,8 @@ function _settingPhotoSwipe(){
       setMainSwiper(){
         const myMainSwiper = new Swiper('.main-photo-swiper',{
           speed: 300,
+          width: 375,
+          height: 375
         })
         this.myMainSwiper = myMainSwiper;
         myMainSwiper.on('slideNextTransitionEnd',function(){
