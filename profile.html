@@ -27,7 +27,6 @@
     <li><a href="http://livedoor.com">bbs</a></li>
     </ul></div>
   </header>
-<div class="typeIcon" id="typeLottie" style="width:188px;height:334px"></div>
   <div id="wrap">
   <div id="photoGallery">
     <div id="mainPhoto">
@@ -137,6 +136,8 @@
 </div><!--/container-->
 
 <div id="pswp-mount"></div>
+
+<span style="position:absolute;" id="ruler"></span>
 
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.4.6/js/swiper.min.js"></script>
@@ -350,70 +351,73 @@ function _menu() {
 }
 _menu()
 
-Vue.directive('scroll', {
-  inserted: function(el, binding) {
-    const element = is_ios_safari ? main : window;
-    let f = function(evt) {
-      if (binding.value(evt, el)) {
-        element.removeEventListener('scroll', f)
-      }
-    }
-    element.addEventListener('scroll',f)
-  }
-})
-Vue.component('distance-circle',{
-  props: ['last'],
-  template: `
-    <svg class="distanceCircle"><circle></circle></svg>
-  `,
-  mounted() {},
-  methods: {
-    setCircleAnimation(){
-      const v = this.$el.getBoundingClientRect();
-      const l = this.$props.last;
-      const rect_width = v.width;
-      const pi = Math.round(rect_width * 3.14);
-      const arc_calc = (pi / 24) * (24 - l);
-      const arc = Math.round(arc_calc);
-      const style = document.createElement('style');
-      style.innerText =
-      '#bbsStatusWrap .statusBody .distance .distanceCircle circle{animation: circle 1s forwards}' +
-      '@keyframes circle{0% {stroke:#ccc;stroke-dasharray:0 ' + pi + '}100% {stroke:#ccc;stroke-dasharray:' + arc + ' ' + pi + '}}';
-      const head = document.getElementsByTagName('head');
-      head.item(0).appendChild(style);
-    },
-  }
-})
-new Vue({
-  el: '#bbsStatusWrap',
-  data: {
-    bbsWrapHeight: document.querySelector('#bbsStatusWrap .statusBody').getBoundingClientRect().height,
-    drawerHeight: Math.ceil(25.1 * 3.75),
-    count: '0'
-  },
-  methods: {
-    reachScroll(evt,el) {
-      if(this.count < 1) {
-        const bbsWrapTop = document.querySelector('#bbsStatusWrap .statusBody').getBoundingClientRect().top;
-        const windowH = window.innerHeight;
-        const scroll_elm = is_ios_safari ? evt.target : document.body;
-        const scroll = scroll_elm.scrollTop;
-        const calc = bbsWrapTop + this.bbsWrapHeight + scroll + this.drawerHeight - windowH;
-        const position = Math.floor(calc);
-        if (scroll >= position) {
-          this.$refs.circle.setCircleAnimation();
-          this.count =+ 1;
+function _bbsSvgAnimation(){
+  Vue.directive('scroll', {
+    inserted: function(el, binding) {
+      const element = is_ios_safari ? main : window;
+      let f = function(evt) {
+        if (binding.value(evt, el)) {
+          element.removeEventListener('scroll', f)
         }
-      } else {
-        return;
+      }
+      element.addEventListener('scroll',f)
+    }
+  })
+  Vue.component('distance-circle',{
+    props: ['last'],
+    template: `
+      <svg class="distanceCircle"><circle></circle></svg>
+    `,
+    mounted() {},
+    methods: {
+      setCircleAnimation(){
+        const v = this.$el.getBoundingClientRect();
+        const l = this.$props.last;
+        const rect_width = v.width;
+        const pi = Math.round(rect_width * 3.14);
+        const arc_calc = (pi / 24) * (24 - l);
+        const arc = Math.round(arc_calc);
+        const style = document.createElement('style');
+        style.innerText =
+        '#bbsStatusWrap .statusBody .distance .distanceCircle circle{animation: circle 1s forwards}' +
+        '@keyframes circle{0% {stroke:#ccc;stroke-dasharray:0 ' + pi + '}100% {stroke:#ccc;stroke-dasharray:' + arc + ' ' + pi + '}}';
+        const head = document.getElementsByTagName('head');
+        head.item(0).appendChild(style);
+      },
+    }
+  })
+  new Vue({
+    el: '#bbsStatusWrap',
+    data: {
+      bbsWrapHeight: document.querySelector('#bbsStatusWrap .statusBody').getBoundingClientRect().height,
+      drawerHeight: Math.ceil(25.1 * 3.75),
+      count: '0'
+    },
+    methods: {
+      reachScroll(evt,el) {
+        if(this.count < 1) {
+          const bbsWrapTop = document.querySelector('#bbsStatusWrap .statusBody').getBoundingClientRect().top;
+          const windowH = window.innerHeight;
+          const scroll_elm = is_ios_safari ? evt.target : document.body;
+          const scroll = scroll_elm.scrollTop;
+          const calc = bbsWrapTop + this.bbsWrapHeight + scroll + this.drawerHeight - windowH;
+          const position = Math.floor(calc);
+          if (scroll >= position) {
+            this.$refs.circle.setCircleAnimation();
+            this.count =+ 1;
+          }
+        } else {
+          return;
+        }
       }
     }
-  }
-})
+  })
+}
+_bbsSvgAnimation()
 
 function _fixedDrawer() {
   Vue.component('computed-textarea',{
-    template: '<textarea :rows="rows" placeholder="メッセージしてみよう" v-model="value"></textarea>',
+    template: '<textarea :rows="rows" placeholder="メッセージしてみよう" v-model="value" @keydown="count"></textarea>',
     data() {
       return {
         value: '',
@@ -423,9 +427,15 @@ function _fixedDrawer() {
       rows() {
         let num = this.value.split('\n').length;
         return (num > 3) ? 3 : num;
-      },
+      }
     },
-    methods: {}
+    methods: {
+      count() {
+        const str = this.value;
+        ruler.innerText = str;
+        console.log(str);
+      }
+    }
   })
   new Vue({
     el: '#fixedDrawer',
