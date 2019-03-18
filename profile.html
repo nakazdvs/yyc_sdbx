@@ -31,6 +31,12 @@
   <div id="wrap">
   <div id="photoGallery">
     <div id="mainPhoto">
+      <div class="cover_status">
+        <div class="status">
+          ありさ
+        </div>
+        <div class="type"><span class="typeIcon" id="typeLottie"></span></div>
+      </div>
       <div class="main-photo-swiper">
         <div class="swiper-wrapper">
           <div class="swiper-slide item"><img src="./img/profile_01_thumb.jpg"></div>
@@ -138,10 +144,17 @@
 <script src="./js/smoothscroll.min.js"></script>
 <script src="./js/photoswipe.js" charset="utf-8"></script>
 <script src="./js/photoswipe-ui-default.js" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.4.4/lottie.min.js" charset="utf-8"></script>
 <!--script src="./js/photoswipe-simplify.js" charset="utf-8"></script-->
 <script>
 'use strict';
 
+const anim = lottie.loadAnimation({
+  container: document.getElementById('typeLottie'),
+  renderer: 'svg',
+  loop: true,
+  path: './js/btn_heart.json'
+});
 
 var ua = window.navigator.userAgent.toLowerCase();
 var is_ios_safari = (ua.indexOf('iphone') !== -1 && ua.indexOf('safari') !== -1 && ua.indexOf('crios') === -1 && ua.indexOf('edge') === -1);
