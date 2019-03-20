@@ -180,13 +180,6 @@ header .menu_list.open {
           filter: blur(2px);
 }
 
-#wrap .type_icon {
-  display: block;
-  width: 18.67vw;
-  height: 18.67vw;
-  background: #fff;
-}
-
 #bbsStatusWrap {
   padding: 4.27vw;
 }
