@@ -175,7 +175,12 @@ const Pswp = Vue.extend({
 new Pswp().$mount('#pswp-mount')
 function _settingPhotoSwipe(){
   Vue.component('lottie-type',{
-    template: `<div id="typeIcon" class="type_icon"></div>`,
+    data() {
+      return {
+        ltte: ''
+      }
+    }
+    template: `<div id="typeIcon" class="type_icon" @click="type"></div>`,
     mounted() {
       this.setTypeLottie();
     },
@@ -188,7 +193,12 @@ function _settingPhotoSwipe(){
           autoplay: false,
           path: './js/data.json'
         });
+        this.ltte = ltte;
       },
+      type() {
+        const ltte = this.ltte;
+        console.log(ltte);
+      }
     }
   })
   new Vue({
