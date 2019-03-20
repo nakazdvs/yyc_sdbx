@@ -29,7 +29,7 @@
   </header>
   <div id="wrap">
   <div id="photoGallery">
-    
+
     <div id="typeIcon" class="type_icon"></div>
   </div>
   <div id="mainPhotoBox" style="background-image:url(./img/profile_01.jpg);"></div>
@@ -113,12 +113,7 @@
 <script>
 'use strict';
 
-const anim = lottie.loadAnimation({
-  container: document.getElementById('typeIcon'),
-  renderer: 'svg',
-  loop: true,
-  path: './js/data.json'
-});
+
 console.log(anim)
 
 var ua = window.navigator.userAgent.toLowerCase();
@@ -211,10 +206,19 @@ function _settingPhotoSwipe(){
     },
     mounted() {
       this.options.index = 0;
+      this.setTypeLottie();
       this.setMainSwiper();
       this.setSubSwiper();
     },
     methods: {
+      setTypeLottie() {
+        const anim = lottie.loadAnimation({
+          container: document.getElementById('typeIcon'),
+          renderer: 'svg',
+          loop: true,
+          path: './js/data.json'
+        });
+      },
       galleryStart() {
         var pswp = new PhotoSwipe( this.pswpElement, PhotoSwipeUI_Default, this.items, this.options);
         pswp.init();
