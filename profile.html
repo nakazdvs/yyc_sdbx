@@ -245,10 +245,11 @@ function _settingPhotoSwipe(){
     },
     methods: {
       setTypeLottie() {
-        const anim = lottie.loadAnimation({
+        const lottie = lottie.loadAnimation({
           container: document.getElementById('typeIcon'),
           renderer: 'svg',
-          loop: true,
+          loop: false,
+          autoplay: false,
           path: './js/data.json'
         });
       },
