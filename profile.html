@@ -177,13 +177,12 @@ function _settingPhotoSwipe(){
   Vue.component('lottie-type',{
     data() {
       return {
-        checkTyped: false,
+        checkTyped: true,
         ltte: ''
       }
     },
     template: `<div id="typeIcon" class="type_icon" @click="type" v-if="checkTyped"></div><div class="type_icon" v-else></div>`,
     mounted() {
-      console.log(this.checkTyped)
       if(this.checkTyped) this.setTypeLottie();
     },
     methods: {
