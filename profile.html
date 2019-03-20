@@ -135,8 +135,7 @@
 </div><!--/container-->
 
 <div id="pswp-mount"></div>
-
-<span style="position:absolute;" id="ruler"></span>
+<div id="ruler"></div>
 
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.4.6/js/swiper.min.js"></script>
@@ -173,6 +172,10 @@ const Pswp = Vue.extend({
   template: `<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true"><div class="pswp__bg"></div><div class="pswp__scroll-wrap"><div class="pswp__container"><div class="pswp__item"></div><div class="pswp__item"></div><div class="pswp__item"></div></div><div class="pswp__ui pswp__ui--hidden"><div class="pswp__top-bar"><div class="pswp__counter"></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button><button class="pswp__button pswp__button--share" title="Share"></button><button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button><button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class="pswp__preloader"><div class="pswp__preloader__icn"><div class="pswp__preloader__cut"><div class="pswp__preloader__donut"></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class="pswp__share-tooltip"></div> </div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button><button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class="pswp__caption"><div class="pswp__caption__center"></div></div></div></div></div>`,
 })
 new Pswp().$mount('#pswp-mount')
+const setruler = Vue.extend({
+  template: `<span id="ruler" style="position:absolute;white-space:nowrap"></span>`
+})
+new setruler().$mount('#ruler');
 function _settingPhotoSwipe(){
   Vue.component('lottie-type',{
     data() {
@@ -183,7 +186,7 @@ function _settingPhotoSwipe(){
     },
     template: `<div id="typeIcon" class="type_icon" @click="type" v-if="checkTyped"></div><div class="type_icon" v-else></div>`,
     mounted() {
-      if(this.checkTyped) this.setTypeLottie();
+      //if(this.checkTyped) this.setTypeLottie();
     },
     methods: {
       setTypeLottie() {
@@ -434,25 +437,64 @@ function _bbsSvgAnimation(){
 }
 _bbsSvgAnimation()
 
+function _textcount() {
+  setInterval(function(){
+    console.log(textarea.value)
+  },500);
+}
+//_textcount()
+
 function _fixedDrawer() {
   Vue.component('computed-textarea',{
-    template: '<textarea :rows="rows" placeholder="メッセージしてみよう" v-model="value" @keydown="count"></textarea>',
+    template: '<textarea :rows="rows" placeholder="メッセージしてみよう" v-model="value" @focus="count" @blur="clear"></textarea>',
     data() {
       return {
+        width: '',
         value: '',
+        setCount: '',
+        rowsMax: 3
       }
+    },
+    mounted() {
+      this.width = this.$el.clientWidth;
     },
     computed: {
       rows() {
         let num = this.value.split('\n').length;
-        return (num > 3) ? 3 : num;
+        return (num > this.rowsMax) ? this.rowsMax : num;
       }
     },
     methods: {
       count() {
-        const str = this.value;
-        ruler.innerText = str;
-        console.log(str);
+        //this.width += this.width
+        //console.log(this.width)
+        const has_val = this.$el.value;
+        let ruler_width = '';
+        let rows_count = 1;
+        this.setCount = setInterval(function(){
+          const rows = this.$el.rows;
+          const typing_val = this.$el.value;
+          ruler.innerText = typing_val;
+          const now_width = ruler.offsetWidth;
+          if (ruler_width !== ruler.offsetWidth) {
+
+            if( now_width > (this.width - (16 * rows_count )) ) {
+              console.log(rows_count)
+              this.$el.rows = rows > this.rowsMax ? this.rowsMax : rows + 1 ;
+              console.log(this.width - 18)
+              console.log(now_width)
+              this.width += this.width
+              rows_count++;
+            }
+
+          } else {
+            console.log('same')
+          }
+          ruler_width = ruler.offsetWidth;
+        }.bind(this),500);
+      },
+      clear() {
+        clearInterval(this.setCount);
       }
     }
   })
