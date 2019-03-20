@@ -136,7 +136,7 @@ header .menu_list.open {
           align-self: flex-end;
 }
 
-#wrap #photoGallery #mainPhoto .cover_status .type .typeIcon {
+#wrap #photoGallery #mainPhoto .cover_status .type .type_icon {
   display: block;
   width: 18.67vw;
   height: 18.67vw;
