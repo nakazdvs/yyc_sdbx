@@ -34,7 +34,7 @@
         <div class="status">
           ありさ
         </div>
-        <div class="type"></div>
+        <div class="type"><span id="typeIcon" class="type_icon"></span></div>
       </div>
       <div class="main-photo-swiper">
         <div class="swiper-wrapper">
@@ -150,14 +150,12 @@
 <script>
 'use strict';
 
-/*
 const anim = lottie.loadAnimation({
-  container: document.getElementById('typeLottie'),
+  container: document.getElementById('typeIcon'),
   renderer: 'svg',
   loop: true,
-  path: './js/btn_heart.json'
+  path: './js/data.json'
 });
-*/
 
 var ua = window.navigator.userAgent.toLowerCase();
 var is_ios_safari = (ua.indexOf('iphone') !== -1 && ua.indexOf('safari') !== -1 && ua.indexOf('crios') === -1 && ua.indexOf('edge') === -1);
