@@ -183,6 +183,7 @@ function _settingPhotoSwipe(){
     },
     template: `<div id="typeIcon" class="type_icon" @click="type" v-if="checkTyped"></div><div class="type_icon" v-else></div>`,
     mounted() {
+      console.log(this.checkTyped)
       this.setTypeLottie();
     },
     methods: {
