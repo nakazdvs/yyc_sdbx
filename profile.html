@@ -34,7 +34,7 @@
         <div class="status">
           ありさ
         </div>
-        <div class="type"><div id="typeIcon" class="type_icon"></div></div>
+        <div class="type"><lottie-type></lottie-type></div>
       </div>
       <div class="main-photo-swiper">
         <div class="swiper-wrapper">
@@ -174,6 +174,23 @@ const Pswp = Vue.extend({
 })
 new Pswp().$mount('#pswp-mount')
 function _settingPhotoSwipe(){
+  Vue.component('lottie-type',{
+    template: `<div id="typeIcon" class="type_icon"></div>`,
+    mounted() {
+      this.setTypeLottie();
+    }
+    methods: {
+      setTypeLottie() {
+        const ltte = lottie.loadAnimation({
+          container: document.getElementById('typeIcon'),
+          renderer: 'svg',
+          loop: false,
+          autoplay: false,
+          path: './js/data.json'
+        });
+      },
+    }
+  })
   new Vue({
     el: '#photoGallery',
     data: {
@@ -239,20 +256,11 @@ function _settingPhotoSwipe(){
     },
     mounted() {
       this.options.index = 0;
-      this.setTypeLottie();
       this.setMainSwiper();
       this.setSubSwiper();
     },
     methods: {
-      setTypeLottie() {
-        const ltte = lottie.loadAnimation({
-          container: document.getElementById('typeIcon'),
-          renderer: 'svg',
-          loop: false,
-          autoplay: false,
-          path: './js/data.json'
-        });
-      },
+
       galleryStart() {
         var pswp = new PhotoSwipe( this.pswpElement, PhotoSwipeUI_Default, this.items, this.options);
         pswp.init();
