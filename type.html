@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>無題ドキュメント</title>
+<meta name="viewport" content="width=320, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+<link rel="stylesheet" href="./css/type.css">
+<style>
+
+</style>
+</head>
+<body>
+
+<div id="cardUI">
+  <card-component
+    v-for="data in cardData"
+    :data="data"
+    :key="data.id"
+    @touch="onTouch"
+    @move="onMove"
+    @end="onEnd"
+  ></card-component>
+</div>
+<div id="btnUI">
+  <a href="#" class="btn skip"></a>
+  <a href="#" class="btn type"></a>
+</div>
+
+<script rel="preload" src="https://unpkg.com/vue/dist/vue.min.js" charset="utf-8" as="script"></script>
+<script>
+'use strict'
+const cardData = [
+  {
+    id: 12345,
+    src: './img/type/mio_2.jpg',
+    label: '今田美桜2 19歳 東京都'
+  },
+  {
+    id: 12346,
+    src: './img/type/mio_3.jpg',
+    label: '今田美桜3 19歳 東京都'
+  }
+]
+const cardComponent = {
+  props:['cardData','data'],
+  template: `
+  <div class="card">
+    <div class="photo" @touchstart="$emit(touch)" @touchmove="$emit(move)" @touchend="$emit(end)"><img :src="data.src" width="100%"></div>
+    <div class="status">
+      <dl>
+        <dt>{{data.label}}</dt>
+      </dl>
+    </div>
+  </div>
+  `
+}
+const cardUI = new Vue({
+  el: '#cardUI',
+  data: {
+    cardData: cardData,
+    touchStart_x: '',
+    touchStart_y: '',
+    clientRect: '',
+    half_width: '',
+    quarter_width: '',
+    positionX: '',
+    positionY: '',
+    moving_distance: '',
+    last_move_x: '',
+    last_move_y: '',
+    last_deg: '',
+    type: false
+  },
+  components: {
+    'card-component': cardComponent
+  },
+  methods: {
+    onTouch() {
+
+    },
+    onMove() {
+
+    },
+    onEnd() {
+
+    }
+  }
+})
+
+</script>
+</body>
+</html>

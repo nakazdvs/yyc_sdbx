@@ -1,0 +1,62 @@
+@import 'function';
+body,h1,h2,ul,dl,dt,dd {
+  margin: 0;
+  padding: 0;
+}
+ul {
+  list-style: none;
+}
+
+body {
+  font-family:Helvetica, sans-serif;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  tap-highlight-color: rgba(0, 0, 0, 0);
+}
+a {
+  text-decoration: none;
+}
+
+#cardUI {
+  position: relative;
+  width: vw(320);
+  height: vw(394);
+  margin: vw(30) auto 0;
+  .card {
+    position: absolute;
+    width: 100%;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow:0px 1px 3px 0px rgba(#000, .26);
+    overflow: hidden;
+    .photo {
+      height: vw(280);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .status {
+      height: vw(114);
+    }
+  }
+}
+#btnUI {
+  width: vw(320);
+  margin: vw(28) auto 0;
+  display: flex;
+  justify-content: space-around;
+  .btn {
+    display: block;
+    width: vw(80);
+    height: vw(80);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    &.skip {
+      background-image: url(../img/type/skip.png);
+    }
+    &.type {
+      background-image: url(../img/type/type.png);
+    }
+  }
+}
