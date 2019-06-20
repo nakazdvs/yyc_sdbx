@@ -13,7 +13,7 @@
 
 <div id="cardUI">
   <card-component
-    v-for="data in cardData"
+    v-for="data in reverseCardData"
     :data="data"
     :key="data.id"
     @touch="onTouch"
@@ -29,14 +29,19 @@
 <script rel="preload" src="https://unpkg.com/vue/dist/vue.min.js" charset="utf-8" as="script"></script>
 <script>
 'use strict'
-const cardData = [
+let cardData = [
   {
-    id: 12345,
+    id: 1,
+    src: './img/type/mio_1.jpg',
+    label: '今田美桜1 19歳 東京都'
+  },
+  {
+    id: 2,
     src: './img/type/mio_2.jpg',
     label: '今田美桜2 19歳 東京都'
   },
   {
-    id: 12346,
+    id: 3,
     src: './img/type/mio_3.jpg',
     label: '今田美桜3 19歳 東京都'
   }
@@ -44,11 +49,11 @@ const cardData = [
 const cardComponent = {
   props:['cardData','data'],
   template: `
-  <div class="card">
-    <div class="photo" @touchstart="$emit(touch)" @touchmove="$emit(move)" @touchend="$emit(end)"><img :src="data.src" width="100%"></div>
+  <div class="card" @touchstart.stop="$emit('touch',$event)" @touchmove.stop.prevent="$emit('move',$event)" @touchend.stop="$emit('end',$event)">
+    <div class="photo"><img :src="data.src" width="100%"></div>
     <div class="status">
       <dl>
-        <dt>{{data.label}}</dt>
+        <dt>{{data.label}}-{{data.id}}</dt>
       </dl>
     </div>
   </div>
@@ -57,32 +62,104 @@ const cardComponent = {
 const cardUI = new Vue({
   el: '#cardUI',
   data: {
-    cardData: cardData,
-    touchStart_x: '',
-    touchStart_y: '',
-    clientRect: '',
-    half_width: '',
-    quarter_width: '',
-    positionX: '',
-    positionY: '',
-    moving_distance: '',
-    last_move_x: '',
-    last_move_y: '',
-    last_deg: '',
-    type: false
+    cardData: [
+      {
+        id: 1,
+        src: './img/type/mio_1.jpg',
+        label: '今田美桜1 19歳 東京都'
+      },
+      {
+        id: 2,
+        src: './img/type/mio_2.jpg',
+        label: '今田美桜2 19歳 東京都'
+      },
+      {
+        id: 3,
+        src: './img/type/mio_3.jpg',
+        label: '今田美桜3 19歳 東京都'
+      }
+    ],
+    swipeObj: {
+      touchStart_x: '',
+      touchStart_y: '',
+      clientRect: '',
+      half_width: '',
+      quarter_width: '',
+      positionX: '',
+      positionY: '',
+      moving_distance: '',
+      last_move_x: '',
+      last_move_y: '',
+      last_deg: '',
+    },
+    type: false,
+    count: 4
+  },
+  computed: {
+    reverseCardData() {
+      return this.cardData.slice().reverse()
+    }
   },
   components: {
     'card-component': cardComponent
   },
   methods: {
-    onTouch() {
+    onTouch(e) {
+      console.log(this.cardData)
+      const t = e.target
+      const start_x = e.changedTouches[0].pageX
+      const start_y = e.changedTouches[0].pageY
 
+      this.swipeObj.clientRect = t.getBoundingClientRect()
+      this.swipeObj.positionX = this.swipeObj.clientRect.left + window.pageXOffset
+      this.swipeObj.positionY =  this.swipeObj.clientRect.top + window.pageYOffset
+      this.swipeObj.half_width = Math.floor(this.swipeObj.clientRect.width / 2)
+      this.swipeObj.quarter_width = this.swipeObj.half_width / 2
+      this.swipeObj.touchStart_x = start_x - this.swipeObj.positionX
+      this.swipeObj.touchStart_y = start_y - this.swipeObj.positionY
     },
-    onMove() {
+    onMove(e) {
+      const t = e.target
+      
+      t.style.transition = null
+      const move_x = e.changedTouches[0].pageX
+      const move_y = e.changedTouches[0].pageY
+      const r_move_x = move_x - this.swipeObj.positionX - this.swipeObj.touchStart_x
+      const r_move_y = move_y - this.swipeObj.positionY - this.swipeObj.touchStart_y
 
+      const max_deg = 15
+      const max_move = this.swipeObj.half_width
+      const deg = max_deg * (this.swipeObj.moving_distance / max_move)
+      this.swipeObj.moving_distance = Math.abs(~~(r_move_x))
+      this.swipeObj.last_move_x = r_move_x
+      this.swipeObj.last_move_y = r_move_y
+      this.swipeObj.last_deg = deg
+
+      const check = Math.sign(r_move_x)
+      if (check === 1) {
+        t.style.transform = `translate3d(${r_move_x}px, ${r_move_y}px, 0) rotate(-${deg}deg)`
+        t.classList.add('type')
+        t.classList.remove('nottype')
+        this.type = true
+      } else if (check === -1) {
+        t.style.transform = `translate3d(${r_move_x}px, ${r_move_y}px, 0) rotate(${deg}deg)`
+        t.classList.add('nottype')
+        t.classList.remove('type')
+        this.type = false
+      }
     },
-    onEnd() {
-
+    onEnd(e) {
+      const t = e.target
+      t.style.transition = '.2s'
+      t.parentNode.removeChild(t)
+      const addObj = {
+        id: this.count,
+        src: './img/type/mio_3.jpg',
+        label: '今田美桜4 19歳 東京都'
+      }
+      this.cardData.push(addObj)
+      this.count++
+      this.cardData.splice(0,1)
     }
   }
 })

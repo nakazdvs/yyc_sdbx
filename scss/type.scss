@@ -24,10 +24,33 @@ a {
   .card {
     position: absolute;
     width: 100%;
+    height: vw(394);
     border-radius: 8px;
     background-color: #fff;
     box-shadow:0px 1px 3px 0px rgba(#000, .26);
     overflow: hidden;
+    transform-origin: center;
+    transform: translate3d(0,0,0);
+    &::before {
+      content: "";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transition: .1s;
+    }
+    &.type::before {
+      content: "いいかも！";
+      font-size: 20px;
+      background-color: rgba(255,0,0,0.3);
+    }
+    &.nottype::before {
+      content: "いまいち…";
+      font-size: 20px;
+      background-color: rgba(51,51,51,0.3);
+    }
     .photo {
       height: vw(280);
       display: flex;

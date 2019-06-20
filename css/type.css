@@ -1,3 +1,4 @@
+@charset "UTF-8";
 body, h1, h2, ul, dl, dt, dd {
   margin: 0;
   padding: 0;
@@ -27,10 +28,39 @@ a {
 #cardUI .card {
   position: absolute;
   width: 100%;
+  height: 105.1vw;
   border-radius: 8px;
   background-color: #fff;
   box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.26);
   overflow: hidden;
+  -webkit-transform-origin: center;
+          transform-origin: center;
+  -webkit-transform: translate3d(0, 0, 0);
+          transform: translate3d(0, 0, 0);
+}
+
+#cardUI .card::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-transition: .1s;
+  transition: .1s;
+}
+
+#cardUI .card.type::before {
+  content: "いいかも！";
+  font-size: 20px;
+  background-color: rgba(255, 0, 0, 0.3);
+}
+
+#cardUI .card.nottype::before {
+  content: "いまいち…";
+  font-size: 20px;
+  background-color: rgba(51, 51, 51, 0.3);
 }
 
 #cardUI .card .photo {
