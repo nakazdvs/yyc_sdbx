@@ -37,6 +37,13 @@ a {
           transform-origin: center;
   -webkit-transform: translate3d(0, 0, 0);
           transform: translate3d(0, 0, 0);
+  -webkit-transition: .2s;
+  transition: .2s;
+}
+
+#cardUI .card:not(:last-child) {
+  -webkit-transform: scale(0.8);
+          transform: scale(0.8);
 }
 
 #cardUI .card::before {

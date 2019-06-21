@@ -31,6 +31,10 @@ a {
     overflow: hidden;
     transform-origin: center;
     transform: translate3d(0,0,0);
+    transition: .2s;//これをどうすうか
+    &:not(:last-child){
+      transform: scale(.8);
+    }
     &::before {
       content: "";
       display: block;

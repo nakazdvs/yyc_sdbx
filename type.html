@@ -13,9 +13,10 @@
 
 <div id="cardUI">
   <card-component
-    v-for="data in reverseCardData"
+    v-for="(data,index) in reverseCardData"
     :data="data"
     :key="data.id"
+    :index="index"
     @touch="onTouch"
     @move="onMove"
     @end="onEnd"
@@ -48,13 +49,13 @@ let cardData = [
 ]
 
 const cardComponent = {
-  props:['cardData','data'],
+  props:['cardData','data','index'],
   template: `
   <div class="card" @touchstart.stop="$emit('touch',$event)" @touchmove.stop.prevent="$emit('move',$event)" @touchend.stop="$emit('end',$event)">
     <div class="photo"><img :src="data.src" width="100%"></div>
     <div class="status">
       <dl>
-        <dt>{{data.label}}-{{data.id}}</dt>
+        <dt>{{data.label}}-{{data.id}}-{{index}}</dt>
       </dl>
     </div>
   </div>
@@ -78,6 +79,21 @@ const cardUI = new Vue({
         id: 3,
         src: './img/type/mio_3.jpg',
         label: '今田美桜3 19歳 東京都'
+      },
+      {
+        id: 4,
+        src: './img/type/mio_1.jpg',
+        label: '今田美桜4 19歳 東京都'
+      },
+      {
+        id: 5,
+        src: './img/type/mio_2.jpg',
+        label: '今田美桜5 19歳 東京都'
+      },
+      {
+        id: 6,
+        src: './img/type/mio_3.jpg',
+        label: '今田美桜6 19歳 東京都'
       }
     ],
     /*
@@ -96,7 +112,7 @@ const cardUI = new Vue({
     },
     */
     type: false,
-    count: 4,
+    count: 6,
     swipeObj: {}
   },
   computed: {
@@ -243,8 +259,8 @@ const cardUI = new Vue({
         src: './img/type/mio_3.jpg',
         label: '今田美桜4 19歳 東京都'
       }
-      this.cardData.push(addObj)
-      this.count++
+      //this.cardData.push(cardData)
+      //this.count++
       this.cardData.splice(0,1)
       Object.keys(obj).forEach(function(k){
         delete obj[k]
