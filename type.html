@@ -46,6 +46,7 @@ let cardData = [
     label: '今田美桜3 19歳 東京都'
   }
 ]
+
 const cardComponent = {
   props:['cardData','data'],
   template: `
@@ -79,6 +80,7 @@ const cardUI = new Vue({
         label: '今田美桜3 19歳 東京都'
       }
     ],
+    /*
     swipeObj: {
       touchStart_x: '',
       touchStart_y: '',
@@ -92,48 +94,88 @@ const cardUI = new Vue({
       last_move_y: '',
       last_deg: '',
     },
+    */
     type: false,
-    count: 4
+    count: 4,
+    swipeObj: {}
   },
   computed: {
     reverseCardData() {
       return this.cardData.slice().reverse()
     }
   },
+  /*
+  mounted() {
+    this.testObj.name = 'taro'
+    this.testObj.age = '23'
+    this.testObj.pref = '東京'
+    console.log(this.testObj)
+  },
+  updated() {
+    this.testObj.name = 'hanako'
+    this.testObj.age = '19'
+    this.testObj.pref = '埼玉'
+    console.log(this.testObj)
+  },
+  */
+  updated() {
+    console.log(this.swipeObj)
+  },
   components: {
     'card-component': cardComponent
   },
   methods: {
     onTouch(e) {
-      console.log(this.cardData)
+
+      /*
+      Object.keys(this.testObj).forEach(function(k){
+      delete this.testObj[k]
+      }.bind(this))
+      console.log(this.testObj)
+      */
+
       const t = e.target
       const start_x = e.changedTouches[0].pageX
       const start_y = e.changedTouches[0].pageY
 
-      this.swipeObj.clientRect = t.getBoundingClientRect()
-      this.swipeObj.positionX = this.swipeObj.clientRect.left + window.pageXOffset
-      this.swipeObj.positionY =  this.swipeObj.clientRect.top + window.pageYOffset
-      this.swipeObj.half_width = Math.floor(this.swipeObj.clientRect.width / 2)
-      this.swipeObj.quarter_width = this.swipeObj.half_width / 2
-      this.swipeObj.touchStart_x = start_x - this.swipeObj.positionX
-      this.swipeObj.touchStart_y = start_y - this.swipeObj.positionY
+      const obj = this.swipeObj
+
+      obj.clientRect = t.getBoundingClientRect()
+      obj.positionX = obj.clientRect.left + window.pageXOffset
+      obj.positionY =  obj.clientRect.top + window.pageYOffset
+      obj.half_width = Math.floor(obj.clientRect.width / 2)
+      obj.quarter_width = obj.half_width / 2
+      obj.touchStart_x = start_x - obj.positionX
+      obj.touchStart_y = start_y - obj.positionY
+
+      /*
+      obj.clientRect = t.getBoundingClientRect()
+      obj.positionX = obj.clientRect.left + window.pageXOffset
+      obj.positionY =  obj.clientRect.top + window.pageYOffset
+      obj.half_width = Math.floor(obj.clientRect.width / 2)
+      obj.quarter_width = obj.half_width / 2
+      obj.touchStart_x = start_x - obj.positionX
+      obj.touchStart_y = start_y - obj.positionY
+      */
     },
     onMove(e) {
       const t = e.target
-      
       t.style.transition = null
+
+      const obj = this.swipeObj
+
       const move_x = e.changedTouches[0].pageX
       const move_y = e.changedTouches[0].pageY
-      const r_move_x = move_x - this.swipeObj.positionX - this.swipeObj.touchStart_x
-      const r_move_y = move_y - this.swipeObj.positionY - this.swipeObj.touchStart_y
+      const r_move_x = move_x - obj.positionX - obj.touchStart_x
+      const r_move_y = move_y - obj.positionY - obj.touchStart_y
 
       const max_deg = 15
-      const max_move = this.swipeObj.half_width
-      const deg = max_deg * (this.swipeObj.moving_distance / max_move)
-      this.swipeObj.moving_distance = Math.abs(~~(r_move_x))
-      this.swipeObj.last_move_x = r_move_x
-      this.swipeObj.last_move_y = r_move_y
-      this.swipeObj.last_deg = deg
+      const max_move = obj.half_width
+      const deg = max_deg * (obj.moving_distance / max_move)
+      obj.moving_distance = Math.abs(~~(r_move_x))
+      obj.last_move_x = r_move_x
+      obj.last_move_y = r_move_y
+      obj.last_deg = deg
 
       const check = Math.sign(r_move_x)
       if (check === 1) {
@@ -151,7 +193,51 @@ const cardUI = new Vue({
     onEnd(e) {
       const t = e.target
       t.style.transition = '.2s'
-      t.parentNode.removeChild(t)
+      const obj = this.swipeObj
+
+      const fall_x = 80
+      const fall_y = 80
+      const fade_x = obj.last_move_x + (this.type ? fall_x : -(fall_x))
+      const fade_y = obj.last_move_y + fall_y
+      const deg = this.type ? -(obj.last_deg) : obj.last_deg
+
+      if (obj.moving_distance > obj.quarter_width) {
+        this.type
+        ? t.classList.add('type_throw')
+        : t.classList.add('nottype_throw')
+        t.style.transform = `translate3d(${fade_x}px, ${fade_y}px, 0) rotate(${deg}deg)`
+        t.style.opacity = 0
+        setTimeout(function(){
+          this.onRelease(t,obj)
+        }.bind(this),200)
+        
+      } else {
+        t.style.transform = `translate3d(0, 0, 0)`
+        setTimeout(function(){
+          t.classList.remove('type')
+          t.classList.remove('nottype')
+        },200);
+      }
+
+      //t.parentNode.removeChild(t)
+
+      /*
+      const addObj = {
+        id: this.count,
+        src: './img/type/mio_3.jpg',
+        label: '今田美桜4 19歳 東京都'
+      }
+
+      this.cardData.push(addObj)
+      this.count++
+      this.cardData.splice(0,1)
+
+      Object.keys(obj).forEach(function(k){
+        delete obj[k]
+      })
+      */
+    },
+    onRelease(el,obj) {
       const addObj = {
         id: this.count,
         src: './img/type/mio_3.jpg',
@@ -160,6 +246,9 @@ const cardUI = new Vue({
       this.cardData.push(addObj)
       this.count++
       this.cardData.splice(0,1)
+      Object.keys(obj).forEach(function(k){
+        delete obj[k]
+      })
     }
   }
 })
