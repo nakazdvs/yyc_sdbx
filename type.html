@@ -13,6 +13,7 @@
 
 <div id="cardUI">
   <card-component
+    :length="listLength"
     v-for="(data,index) in reverseCardData"
     :data="data"
     :key="data.id"
@@ -23,8 +24,8 @@
   ></card-component>
 </div>
 <div id="btnUI">
-  <a href="#" class="btn skip"></a>
-  <a href="#" class="btn type"></a>
+  <a href="#" class="btn skip" :class="setScaleSkip" @click="onSkip"></a>
+  <a href="#" class="btn type" :class="setScaleType" @click="onType"></a>
 </div>
 
 <script rel="preload" src="https://unpkg.com/vue/dist/vue.min.js" charset="utf-8" as="script"></script>
@@ -49,13 +50,52 @@ let cardData = [
 ]
 
 const cardComponent = {
-  props:['cardData','data','index'],
+  props:['cardData','data','index','length'],
+  data() {
+    return {
+      current: 1,
+      next: 2
+    }
+  },
+  computed: {
+    count() {
+      return this.$props.length - this.$props.index
+    },
+    currentCard() {
+      return this.count == this.current ? 'current' : null
+    },
+    layerClass() {
+      return {
+        'current': this.count == this.current,
+        'next': this.count == this.next,
+      }
+    },
+    setScale() {
+      const count = this.count
+      const scale = 
+        count == this.current 
+        ? 'scale(1)' 
+        : count == this.next 
+          ? 'scale(0.8)' 
+          : 'scale(0.7)'
+      return {
+        transform: scale
+      }
+    },
+  },
   template: `
-  <div class="card" @touchstart.stop="$emit('touch',$event)" @touchmove.stop.prevent="$emit('move',$event)" @touchend.stop="$emit('end',$event)">
+  <div
+      class="card"
+      :class="layerClass"
+      :style="setScale"
+      @touchstart.stop="$emit('touch',$event)"
+      @touchmove.stop.prevent="$emit('move',$event)"
+      @touchend.stop="$emit('end',$event)"
+  >
     <div class="photo"><img :src="data.src" width="100%"></div>
     <div class="status">
       <dl>
-        <dt>{{data.label}}-{{data.id}}-{{index}}</dt>
+        <dt>{{data.label}}-{{data.id}}</dt>
       </dl>
     </div>
   </div>
@@ -96,44 +136,20 @@ const cardUI = new Vue({
         label: '今田美桜6 19歳 東京都'
       }
     ],
-    /*
-    swipeObj: {
-      touchStart_x: '',
-      touchStart_y: '',
-      clientRect: '',
-      half_width: '',
-      quarter_width: '',
-      positionX: '',
-      positionY: '',
-      moving_distance: '',
-      last_move_x: '',
-      last_move_y: '',
-      last_deg: '',
-    },
-    */
     type: false,
     count: 6,
-    swipeObj: {}
+    swipeObj: {},
+    currentCard: '',
+    nextCard: ''
   },
   computed: {
     reverseCardData() {
       return this.cardData.slice().reverse()
+    },
+    listLength() {
+      return this.cardData.length
     }
   },
-  /*
-  mounted() {
-    this.testObj.name = 'taro'
-    this.testObj.age = '23'
-    this.testObj.pref = '東京'
-    console.log(this.testObj)
-  },
-  updated() {
-    this.testObj.name = 'hanako'
-    this.testObj.age = '19'
-    this.testObj.pref = '埼玉'
-    console.log(this.testObj)
-  },
-  */
   updated() {
     console.log(this.swipeObj)
   },
@@ -141,15 +157,10 @@ const cardUI = new Vue({
     'card-component': cardComponent
   },
   methods: {
+    setCurrentCard(c){
+      console.log('hoge')
+    },
     onTouch(e) {
-
-      /*
-      Object.keys(this.testObj).forEach(function(k){
-      delete this.testObj[k]
-      }.bind(this))
-      console.log(this.testObj)
-      */
-
       const t = e.target
       const start_x = e.changedTouches[0].pageX
       const start_y = e.changedTouches[0].pageY
@@ -164,20 +175,12 @@ const cardUI = new Vue({
       obj.touchStart_x = start_x - obj.positionX
       obj.touchStart_y = start_y - obj.positionY
 
-      /*
-      obj.clientRect = t.getBoundingClientRect()
-      obj.positionX = obj.clientRect.left + window.pageXOffset
-      obj.positionY =  obj.clientRect.top + window.pageYOffset
-      obj.half_width = Math.floor(obj.clientRect.width / 2)
-      obj.quarter_width = obj.half_width / 2
-      obj.touchStart_x = start_x - obj.positionX
-      obj.touchStart_y = start_y - obj.positionY
-      */
+      this.currentCard = t
+      this.nextCard = t.previousElementSibling
     },
     onMove(e) {
       const t = e.target
       t.style.transition = null
-
       const obj = this.swipeObj
 
       const move_x = e.changedTouches[0].pageX
@@ -193,17 +196,25 @@ const cardUI = new Vue({
       obj.last_move_y = r_move_y
       obj.last_deg = deg
 
+      const cal_scale = 0.8 + (0.2 * (obj.moving_distance / obj.quarter_width))
+      const max_scale = cal_scale < 0.95 ? cal_scale : 0.95
+      this.nextCardScale(max_scale)
+
       const check = Math.sign(r_move_x)
       if (check === 1) {
         t.style.transform = `translate3d(${r_move_x}px, ${r_move_y}px, 0) rotate(-${deg}deg)`
         t.classList.add('type')
         t.classList.remove('nottype')
         this.type = true
+        btnUI.scaleType = true
+        btnUI.scaleSkip = false
       } else if (check === -1) {
         t.style.transform = `translate3d(${r_move_x}px, ${r_move_y}px, 0) rotate(${deg}deg)`
         t.classList.add('nottype')
         t.classList.remove('type')
         this.type = false
+        btnUI.scaleSkip = true
+        btnUI.scaleType = false
       }
     },
     onEnd(e) {
@@ -223,37 +234,26 @@ const cardUI = new Vue({
         : t.classList.add('nottype_throw')
         t.style.transform = `translate3d(${fade_x}px, ${fade_y}px, 0) rotate(${deg}deg)`
         t.style.opacity = 0
+        this.nextCardScale(1.0)
+        this.nextCard.style.transition = '.2s'
         setTimeout(function(){
           this.onRelease(t,obj)
         }.bind(this),200)
         
       } else {
+        btnUI.scaleType = false
+        btnUI.scaleSkip = false
         t.style.transform = `translate3d(0, 0, 0)`
         setTimeout(function(){
           t.classList.remove('type')
           t.classList.remove('nottype')
         },200);
       }
-
-      //t.parentNode.removeChild(t)
-
-      /*
-      const addObj = {
-        id: this.count,
-        src: './img/type/mio_3.jpg',
-        label: '今田美桜4 19歳 東京都'
-      }
-
-      this.cardData.push(addObj)
-      this.count++
-      this.cardData.splice(0,1)
-
-      Object.keys(obj).forEach(function(k){
-        delete obj[k]
-      })
-      */
     },
     onRelease(el,obj) {
+      this.nextCard.style.transition = null
+      btnUI.scaleType = false
+      btnUI.scaleSkip = false
       const addObj = {
         id: this.count,
         src: './img/type/mio_3.jpg',
@@ -265,10 +265,54 @@ const cardUI = new Vue({
       Object.keys(obj).forEach(function(k){
         delete obj[k]
       })
+      console.log('end')
+    },
+    nextCardScale(scale) {
+      this.nextCard.style.transform = `scale(${scale})`
     }
   }
 })
+const btnUI = new Vue({
+  el: '#btnUI',
+  data: {
+    scaleSkip: false,
+    scaleType: false,
+    timer: 0,
+    interval: ''
+  },
+  computed: {
+    setScaleSkip() {
+      return this.scaleSkip ? 'scale' : null
+    },
+    setScaleType() {
+      return this.scaleType ? 'scale' : null
+    },
+    cardHeight() {
+      const card = cardUI.$el.querySelector('.current')
+      return card.offsetHeight;
+    }
+  },
+  mounted() {
+    console.log(this.cardHeight)
+  },
+  methods: {
+    onType() {
+      const currentCard = cardUI.$el.querySelector('.current')
+      currentCard.style.transition = '1s'
+      currentCard.style.transformOrigin = `center ${this.cardHeight * 3}px`
+      currentCard.style.transform = `rotate(15deg)`
+      //this.interval = setInterval(this.intervalTranslate,1,currentCard)
+    },
+    onSkip() {
 
+    },
+    intervalTranslate(card) {
+      const count = ++this.timer
+      card.style.transform = `translate3d(${count}px,${count}px,0)`
+      if (count === 500) clearInterval(this.interval)
+    }
+  }
+})
 </script>
 </body>
 </html>

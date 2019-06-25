@@ -11,6 +11,7 @@ body {
   font-family:Helvetica, sans-serif;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   tap-highlight-color: rgba(0, 0, 0, 0);
+  overflow-x: hidden;
 }
 a {
   text-decoration: none;
@@ -27,14 +28,10 @@ a {
     height: vw(394);
     border-radius: 8px;
     background-color: #fff;
-    box-shadow:0px 1px 3px 0px rgba(#000, .26);
+    box-shadow:0px 0px 3px 1px rgba(#000, .26);
     overflow: hidden;
     transform-origin: center;
     transform: translate3d(0,0,0);
-    transition: .2s;//これをどうすうか
-    &:not(:last-child){
-      transform: scale(.8);
-    }
     &::before {
       content: "";
       display: block;
@@ -79,6 +76,10 @@ a {
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
+    transition: .2s;
+    &.scale {
+      transform: scale(1.2);
+    }
     &.skip {
       background-image: url(../img/type/skip.png);
     }

@@ -12,6 +12,7 @@ body {
   font-family: Helvetica, sans-serif;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   tap-highlight-color: rgba(0, 0, 0, 0);
+  overflow-x: hidden;
 }
 
 a {
@@ -31,19 +32,12 @@ a {
   height: 105.1vw;
   border-radius: 8px;
   background-color: #fff;
-  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.26);
+  box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.26);
   overflow: hidden;
   -webkit-transform-origin: center;
           transform-origin: center;
   -webkit-transform: translate3d(0, 0, 0);
           transform: translate3d(0, 0, 0);
-  -webkit-transition: .2s;
-  transition: .2s;
-}
-
-#cardUI .card:not(:last-child) {
-  -webkit-transform: scale(0.8);
-          transform: scale(0.8);
 }
 
 #cardUI .card::before {
@@ -105,6 +99,13 @@ a {
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
+  -webkit-transition: .2s;
+  transition: .2s;
+}
+
+#btnUI .btn.scale {
+  -webkit-transform: scale(1.2);
+          transform: scale(1.2);
 }
 
 #btnUI .btn.skip {
