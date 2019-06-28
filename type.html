@@ -11,27 +11,29 @@
 </head>
 <body>
 
-<div id="cardUI">
-  <card-component
-    :length="listLength"
-    v-for="(data,index) in reverseCardData"
-    :data="data"
-    :key="data.id"
-    :index="index"
-    @touch="onTouch"
-    @move="onMove"
-    @end="onEnd"
-  ></card-component>
-</div>
-<div id="btnUI">
-  <a href="#" class="btn skip" :class="setScaleSkip" @click="onSkip"></a>
-  <a href="#" class="btn type" :class="setScaleType" @click="onType"></a>
+<div id="typeApp">
+  <div id="cardUI">
+    <template v-for="(d,i) in cardData" :key="d.id">
+    <div class="card" v-card>
+      <div class="photo"><img :src="d.src" width="100%"></div>
+      <div class="status">
+        <dl>
+          <dt>{{d.label}}-{{d.id}}</dt>
+        </dl>
+      </div>
+    </div>
+    </template>
+  </div>
+  <div id="btnUI">
+    <a href="#" class="btn skip"></a>
+    <a href="#" class="btn type"></a>
+  </div>
 </div>
 
 <script rel="preload" src="https://unpkg.com/vue/dist/vue.min.js" charset="utf-8" as="script"></script>
 <script>
 'use strict'
-let cardData = [
+const returnApi = [
   {
     id: 1,
     src: './img/type/mio_1.jpg',
@@ -46,270 +48,117 @@ let cardData = [
     id: 3,
     src: './img/type/mio_3.jpg',
     label: '今田美桜3 19歳 東京都'
+  },
+  {
+    id: 4,
+    src: './img/type/mio_1.jpg',
+    label: '今田美桜4 19歳 東京都'
+  },
+  {
+    id: 5,
+    src: './img/type/mio_2.jpg',
+    label: '今田美桜5 19歳 東京都'
+  },
+  {
+    id: 6,
+    src: './img/type/mio_3.jpg',
+    label: '今田美桜6 19歳 東京都'
   }
 ]
-
-const cardComponent = {
-  props:['cardData','data','index','length'],
-  data() {
-    return {
-      current: 1,
-      next: 2
-    }
+const returnApi2 = [
+  {
+    id: 7,
+    src: './img/type/mio_1.jpg',
+    label: '今田美桜7 19歳 東京都'
   },
-  computed: {
-    count() {
-      return this.$props.length - this.$props.index
-    },
-    currentCard() {
-      return this.count == this.current ? 'current' : null
-    },
-    layerClass() {
-      return {
-        'current': this.count == this.current,
-        'next': this.count == this.next,
-      }
-    },
-    setScale() {
-      const count = this.count
-      const scale = 
-        count == this.current 
-        ? 'scale(1)' 
-        : count == this.next 
-          ? 'scale(0.8)' 
-          : 'scale(0.7)'
-      return {
-        transform: scale
-      }
-    },
+  {
+    id: 8,
+    src: './img/type/mio_2.jpg',
+    label: '今田美桜8 19歳 東京都'
   },
-  template: `
-  <div
-      class="card"
-      :class="layerClass"
-      :style="setScale"
-      @touchstart.stop="$emit('touch',$event)"
-      @touchmove.stop.prevent="$emit('move',$event)"
-      @touchend.stop="$emit('end',$event)"
-  >
-    <div class="photo"><img :src="data.src" width="100%"></div>
-    <div class="status">
-      <dl>
-        <dt>{{data.label}}-{{data.id}}</dt>
-      </dl>
-    </div>
-  </div>
-  `
-}
-const cardUI = new Vue({
-  el: '#cardUI',
-  data: {
-    cardData: [
-      {
-        id: 1,
-        src: './img/type/mio_1.jpg',
-        label: '今田美桜1 19歳 東京都'
-      },
-      {
-        id: 2,
-        src: './img/type/mio_2.jpg',
-        label: '今田美桜2 19歳 東京都'
-      },
-      {
-        id: 3,
-        src: './img/type/mio_3.jpg',
-        label: '今田美桜3 19歳 東京都'
-      },
-      {
-        id: 4,
-        src: './img/type/mio_1.jpg',
-        label: '今田美桜4 19歳 東京都'
-      },
-      {
-        id: 5,
-        src: './img/type/mio_2.jpg',
-        label: '今田美桜5 19歳 東京都'
-      },
-      {
-        id: 6,
-        src: './img/type/mio_3.jpg',
-        label: '今田美桜6 19歳 東京都'
-      }
-    ],
-    type: false,
-    count: 6,
-    swipeObj: {},
-    currentCard: '',
-    nextCard: ''
+  {
+    id: 9,
+    src: './img/type/mio_3.jpg',
+    label: '今田美桜9 19歳 東京都'
   },
-  computed: {
-    reverseCardData() {
-      return this.cardData.slice().reverse()
-    },
-    listLength() {
-      return this.cardData.length
-    }
+  {
+    id: 10,
+    src: './img/type/mio_1.jpg',
+    label: '今田美桜10 19歳 東京都'
   },
-  updated() {
-    console.log(this.swipeObj)
+  {
+    id: 11,
+    src: './img/type/mio_2.jpg',
+    label: '今田美桜11 19歳 東京都'
   },
-  components: {
-    'card-component': cardComponent
-  },
-  methods: {
-    setCurrentCard(c){
-      console.log('hoge')
-    },
-    onTouch(e) {
-      const t = e.target
-      const start_x = e.changedTouches[0].pageX
-      const start_y = e.changedTouches[0].pageY
-
-      const obj = this.swipeObj
-
-      obj.clientRect = t.getBoundingClientRect()
-      obj.positionX = obj.clientRect.left + window.pageXOffset
-      obj.positionY =  obj.clientRect.top + window.pageYOffset
-      obj.half_width = Math.floor(obj.clientRect.width / 2)
-      obj.quarter_width = obj.half_width / 2
-      obj.touchStart_x = start_x - obj.positionX
-      obj.touchStart_y = start_y - obj.positionY
-
-      this.currentCard = t
-      this.nextCard = t.previousElementSibling
-    },
-    onMove(e) {
-      const t = e.target
-      t.style.transition = null
-      const obj = this.swipeObj
-
-      const move_x = e.changedTouches[0].pageX
-      const move_y = e.changedTouches[0].pageY
-      const r_move_x = move_x - obj.positionX - obj.touchStart_x
-      const r_move_y = move_y - obj.positionY - obj.touchStart_y
-
-      const max_deg = 15
-      const max_move = obj.half_width
-      const deg = max_deg * (obj.moving_distance / max_move)
-      obj.moving_distance = Math.abs(~~(r_move_x))
-      obj.last_move_x = r_move_x
-      obj.last_move_y = r_move_y
-      obj.last_deg = deg
-
-      const cal_scale = 0.8 + (0.2 * (obj.moving_distance / obj.quarter_width))
-      const max_scale = cal_scale < 0.95 ? cal_scale : 0.95
-      this.nextCardScale(max_scale)
-
-      const check = Math.sign(r_move_x)
-      if (check === 1) {
-        t.style.transform = `translate3d(${r_move_x}px, ${r_move_y}px, 0) rotate(-${deg}deg)`
-        t.classList.add('type')
-        t.classList.remove('nottype')
-        this.type = true
-        btnUI.scaleType = true
-        btnUI.scaleSkip = false
-      } else if (check === -1) {
-        t.style.transform = `translate3d(${r_move_x}px, ${r_move_y}px, 0) rotate(${deg}deg)`
-        t.classList.add('nottype')
-        t.classList.remove('type')
-        this.type = false
-        btnUI.scaleSkip = true
-        btnUI.scaleType = false
-      }
-    },
-    onEnd(e) {
-      const t = e.target
-      t.style.transition = '.2s'
-      const obj = this.swipeObj
-
-      const fall_x = 80
-      const fall_y = 80
-      const fade_x = obj.last_move_x + (this.type ? fall_x : -(fall_x))
-      const fade_y = obj.last_move_y + fall_y
-      const deg = this.type ? -(obj.last_deg) : obj.last_deg
-
-      if (obj.moving_distance > obj.quarter_width) {
-        this.type
-        ? t.classList.add('type_throw')
-        : t.classList.add('nottype_throw')
-        t.style.transform = `translate3d(${fade_x}px, ${fade_y}px, 0) rotate(${deg}deg)`
-        t.style.opacity = 0
-        this.nextCardScale(1.0)
-        this.nextCard.style.transition = '.2s'
-        setTimeout(function(){
-          this.onRelease(t,obj)
-        }.bind(this),200)
-        
-      } else {
-        btnUI.scaleType = false
-        btnUI.scaleSkip = false
-        t.style.transform = `translate3d(0, 0, 0)`
-        setTimeout(function(){
-          t.classList.remove('type')
-          t.classList.remove('nottype')
-        },200);
-      }
-    },
-    onRelease(el,obj) {
-      this.nextCard.style.transition = null
-      btnUI.scaleType = false
-      btnUI.scaleSkip = false
-      const addObj = {
-        id: this.count,
-        src: './img/type/mio_3.jpg',
-        label: '今田美桜4 19歳 東京都'
-      }
-      //this.cardData.push(cardData)
-      //this.count++
-      this.cardData.splice(0,1)
-      Object.keys(obj).forEach(function(k){
-        delete obj[k]
-      })
-      console.log('end')
-    },
-    nextCardScale(scale) {
-      this.nextCard.style.transform = `scale(${scale})`
-    }
+  {
+    id: 12,
+    src: './img/type/mio_3.jpg',
+    label: '今田美桜12 19歳 東京都'
   }
-})
-const btnUI = new Vue({
-  el: '#btnUI',
+]
+const typeApp = new Vue({
+  el: '#typeApp',
   data: {
-    scaleSkip: false,
-    scaleType: false,
-    timer: 0,
-    interval: ''
+    cardData: ''
+  },
+  created() {
+    this.cardData = returnApi.slice().reverse()
   },
   computed: {
-    setScaleSkip() {
-      return this.scaleSkip ? 'scale' : null
-    },
-    setScaleType() {
-      return this.scaleType ? 'scale' : null
-    },
-    cardHeight() {
-      const card = cardUI.$el.querySelector('.current')
-      return card.offsetHeight;
+    cardList() {
+      return this.cardData
+    }
+  },
+  directives: {
+    card: {
+      inserted(el,binding,vm) {
+        console.log(this)
+        const state = {}
+        el.addEventListener('touchstart',function(e){
+          e.stopPropagation();
+          //console.log(typeApp)
+          //console.log(el.previousElementSibling)
+          //state.id = binding.value
+          //console.log(typeApp.cardData)
+          //console.log(typeApp.cardData.length)
+          //console.log(typeApp.cardData)
+          //console.log(returnApi2)
+        })
+        el.addEventListener('touchend',function(e){
+          e.stopPropagation();
+          //console.log(state)
+          //typeApp.cardData.splice(typeApp.cardData.length - 1,typeApp.cardData.length)
+          //console.log(typeApp.cardData)
+          //console.log(typeApp.cardData.length)
+          //console.log(typeApp.cardData)
+          /*
+          returnApi2.forEach(function(a){
+            typeApp.cardData.splice(0,0,a)
+          })
+          */
+          //console.log(typeApp.cardData)
+          typeApp.updateCardData()
+        })
+      }
     }
   },
   mounted() {
-    console.log(this.cardHeight)
+    //console.log(this.cardData)
+    //this.cardData = this.cardData.concat(returnApi2)
+    //console.log(this.cardData)
+    //console.log(this.cardData.concat(this.cardData2))
+    //console.log(this.cardData)
+    //console.log(this.cardData2)
+    //this.updateCardData()
   },
   methods: {
-    onType() {
-      const currentCard = cardUI.$el.querySelector('.current')
-      currentCard.style.transition = '1s'
-      currentCard.style.transformOrigin = `center ${this.cardHeight * 3}px`
-      currentCard.style.transform = `rotate(15deg)`
-      //this.interval = setInterval(this.intervalTranslate,1,currentCard)
-    },
-    onSkip() {
-
-    },
-    intervalTranslate(card) {
-      const count = ++this.timer
-      card.style.transform = `translate3d(${count}px,${count}px,0)`
-      if (count === 500) clearInterval(this.interval)
+    updateCardData(){
+      const addAPI = returnApi2
+      typeApp.cardData.splice(this.cardData.length - 1,this.cardData.length)
+      addAPI.forEach(function(a){
+        this.cardData.splice(0,0,a)
+      }.bind(this))
     }
   }
 })
