@@ -12,13 +12,13 @@
 <body>
 
 <div id="typeApp">
-  <div id="cardUI">
-    <template v-for="(d,i) in cardData" :key="d.id">
-    <div class="card" v-card>
+  <div id="cardUI" ref="cardWrap">
+    <template v-for="(d,i) in cardData" :key="d.id" v-card>
+    <div class="card">
       <div class="photo"><img :src="d.src" width="100%"></div>
       <div class="status">
         <dl>
-          <dt>{{d.label}}-{{d.id}}</dt>
+          <dt>{{d.label}}-{{d.id}}-{{i}}</dt>
         </dl>
       </div>
     </div>
@@ -100,7 +100,8 @@ const returnApi2 = [
 const typeApp = new Vue({
   el: '#typeApp',
   data: {
-    cardData: ''
+    cardData: '',
+    currentCard: ''
   },
   created() {
     this.cardData = returnApi.slice().reverse()
@@ -108,17 +109,34 @@ const typeApp = new Vue({
   computed: {
     cardList() {
       return this.cardData
+    },
+    cardWrap() {
+      return this.$refs.cardWrap
     }
   },
   directives: {
     card: {
-      inserted(el,binding,vm) {
-        console.log(this)
+      bind(el,binding,vm) {
+        //const xvm = typeApp
         const state = {}
         el.addEventListener('touchstart',function(e){
           e.stopPropagation();
+          console.log(e.target)
+
+          const start_x = e.changedTouches[0].pageX
+          const start_y = e.changedTouches[0].pageY
+
+          state.clientRect = el.getBoundingClientRect()
+          state.positionX = state.clientRect.left + window.pageXOffset
+          state.positionY = state.clientRect.top + window.pageYOffset
+          state.halfWidth = Math.floor(state.clientRect.width / 2)
+          state.quarterWidth = state.halfWidth / 2
+          state.touchStartX = start_x - state.positionX
+          state.touchStartY = start_y - state.positionY
+
+          //xvm.currentCard = el
           //console.log(typeApp)
-          //console.log(el.previousElementSibling)
+          
           //state.id = binding.value
           //console.log(typeApp.cardData)
           //console.log(typeApp.cardData.length)
@@ -126,7 +144,7 @@ const typeApp = new Vue({
           //console.log(returnApi2)
         })
         el.addEventListener('touchend',function(e){
-          e.stopPropagation();
+          e.stopPropagation()
           //console.log(state)
           //typeApp.cardData.splice(typeApp.cardData.length - 1,typeApp.cardData.length)
           //console.log(typeApp.cardData)
@@ -137,8 +155,9 @@ const typeApp = new Vue({
             typeApp.cardData.splice(0,0,a)
           })
           */
+          console.log(el.previousElementSibling)
           //console.log(typeApp.cardData)
-          typeApp.updateCardData()
+          typeApp.updateCardData(el)
         })
       }
     }
@@ -153,11 +172,31 @@ const typeApp = new Vue({
     //this.updateCardData()
   },
   methods: {
-    updateCardData(){
+    updateCardData(el){
+      //el.parentNode.removeChild(el)
+      //const addAPI = returnApi2
+      //console.log(el)
+      //this.insertCardList(addAPI)
       const addAPI = returnApi2
       typeApp.cardData.splice(this.cardData.length - 1,this.cardData.length)
       addAPI.forEach(function(a){
         this.cardData.splice(0,0,a)
+      }.bind(this))
+      
+    },
+    insertCardList(obj) {
+      obj.forEach(function(o){
+        const card = `
+        <div class="card">
+          <div class="photo"><img src="${o.src}" width="100%"></div>
+          <div class="status">
+            <dl>
+              <dt>${o.label}-${o.id}</dt>
+            </dl>
+          </div>
+        </div>
+        `
+        this.cardWrap.insertAdjacentHTML('afterbegin',card)
       }.bind(this))
     }
   }
