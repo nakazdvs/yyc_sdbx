@@ -170,15 +170,6 @@ const typeApp = new Vue({
     card(el,binding) {
       const current = el.classList.contains('current')
       const state = {}
-      const card = new cardStyle()
-      const vueCard = new Vue({
-        data: {
-          state: {}
-        },
-        destroyed() {
-          console.log('destroyed')
-        }
-      })
       const onTouch = function(e) {
         e.stopPropagation()
 
@@ -199,7 +190,6 @@ const typeApp = new Vue({
         card.setState = {
           'relativeTouchstartX': startX - relativePositionX
         }
-        Vue.set(vueCard.state,'relativeTouchstartX',startX - relativePositionX)
       }
       const onMove = function(e) {
         e.stopPropagation()
@@ -225,7 +215,6 @@ const typeApp = new Vue({
         card.setState = {
           'lastDeg': setDeg
         }
-        Vue.set(vueCard.state,'lastDeg',setDeg)
 
         const is_check_sign = Math.sign(relativeMoveX)
         
@@ -254,10 +243,11 @@ const typeApp = new Vue({
       const onEnd = function(e) {
         e.stopPropagation()
         console.log(card.state)
-        console.log(vueCard.state)
         typeApp.updateCardData()
       }
       if (current) {
+        var card = new cardStyle()
+        console.log(card)
         el.addEventListener('touchstart',onTouch)
         el.addEventListener('touchmove',onMove)
         el.addEventListener('touchend',onEnd)
