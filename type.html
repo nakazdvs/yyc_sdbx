@@ -12,10 +12,21 @@
 <body>
 
 <div id="typeApp">
-  <div id="cardUI" ref="cardWrap"></div>
+  <div id="cardUI" ref="cardWrap">
+    <template v-for="(d,i) in cardList" :key="d.id">
+    <div class="card" :class="setOrderClass(i)" v-card>
+      <div class="photo"><img :src="d.src" width="100%"></div>
+      <div class="status">
+        <dl>
+          <dt>{{d.label}}-{{d.id}}</dt>
+        </dl>
+      </div>
+    </div>
+    </template>
+  </div>
   <div id="btnUI">
-    <a href="#" class="btn skip"></a>
-    <a href="#" class="btn type"></a>
+    <a href="#" class="btn skip" @click="onSkip"></a>
+    <a href="#" class="btn type" @click="onType"></a>
   </div>
 </div>
 
@@ -86,86 +97,202 @@ const returnApi2 = [
     label: '今田美桜12 19歳 東京都'
   }
 ]
+const cardStyle = class {
+  constructor(c,x,y,d) {
+    this.checkSign = c
+    this.moveX = x
+    this.moveY = y
+    this.deg = d
+    this.type = ''
+    this.state = {}
+  }
+  get set() {
+    this.create()
+    //return this.type
+  }
+  create() {
+    if (this.checkSign === 1) {
+      this.type = true
+    } else if (this.checkSign === -1) {
+      this.type = false
+    }
+    console.log(this.type)
+  }
+  get getState() {
+    return this.state
+  }
+  set setState(v) {
+    this.concat(v)
+  }
+  concat(v) {
+    const assign = Object.assign(this.state,v)
+    this.state = assign
+  }
+}
+
 const typeApp = new Vue({
   el: '#typeApp',
   data: {
     loadedCardData: '',
-    currentCard: '',
   },
   created() {
-    this.loadedCardData = returnApi
+    this.loadedCardData = returnApi.slice().reverse()
   },
   computed: {
     cardList() {
       return this.loadedCardData
     },
-    cardWrap() {
-      return this.$refs.cardWrap
-    }
-  },
-  mounted() {
-    this.insertCardList(this.cardList)
-    this.cardAction()
-  },
-  updated() {
-    this.cardAction()
-  },
-  methods: {
-    cardAction() {
-      const vm = this
-      const touch = Array.prototype.slice.call(this.cardWrap.querySelectorAll('.card'))
-      touch.forEach(function(t){
-        t.addEventListener('touchstart',function(e){
-          //typeApp.insertCardList(returnApi2)
-          vm.onRelese(t)
-        })
-      })
-    },
-    onRelese(el) {
-      console.log(this.cardWrap)
-      this.cardWrap.removeChild(el)
-      this.checkLengthAndInsert()
-      
-    },
-    checkLengthAndInsert() {
-      const cardLength = this.cardWrap.querySelectorAll('.card').length
-      console.log(cardLength)
-      if (cardLength < 3) {
-        this.insertCardList(returnApi2)
-        //typeApp.$forceUpdate()
-        this.cardAction()
+    setOrderClass() {
+      const length = this.cardList.length
+      return function(i) {
+        if((length - i ) === 1) {
+          return 'current'
+        } else if ((length - i ) === 2) {
+          return 'next'
+        }
       }
     },
-    createCard(o){
-      return `
-        <div class="card" v-if="hoge">
-          <div class="photo"><img src="${o.src}" width="100%"></div>
-          <div class="status">
-            <dl>
-              <dt>${o.label}-${o.id}</dt>
-            </dl>
-          </div>
-        </div>
-      `
+    setOrderRefs() {
+      const length = this.cardList.length
+      return function(i) {
+        if((length - i ) === 1) {
+          return 'current'
+        } else if ((length - i ) === 2) {
+          return 'next'
+        }
+      }
     },
-    insertCardList(obj) {
-      obj.forEach(function(o){
-        const card = this.createCard(o)
-        this.cardWrap.insertAdjacentHTML('afterbegin',card)
-      }.bind(this))
+    cardWrap() {
+      return this.$refs.cardWrap
     },
-    updateCardData(el){
-      //el.parentNode.removeChild(el)
-      //const addAPI = returnApi2
-      //console.log(el)
-      //this.insertCardList(addAPI)
-      const addAPI = returnApi2
-      typeApp.cardData.splice(this.cardData.length - 1,this.cardData.length)
-      addAPI.forEach(function(a){
-        this.cardData.splice(0,0,a)
-      }.bind(this))
-      
+  },
+  directives: {
+    card(el,binding) {
+      const current = el.classList.contains('current')
+      const state = {}
+      const card = new cardStyle()
+      const vueCard = new Vue({
+        data: {
+          state: {}
+        },
+        destroyed() {
+          console.log('destroyed')
+        }
+      })
+      const onTouch = function(e) {
+        e.stopPropagation()
+
+        const startX = e.changedTouches[0].pageX
+        const startY = e.changedTouches[0].pageY
+        const clientRect = el.getBoundingClientRect()
+        const relativePositionX = clientRect.left + window.pageXOffset
+        const relativePositionY = clientRect.top + window.pageYOffset
+        const halfWidth = Math.floor(clientRect.width / 2)
+
+        state.relativePositionX = relativePositionX
+        state.relativePositionY =  relativePositionY
+        state.halfWidth = halfWidth
+        state.quarterWidth = halfWidth / 2
+        state.relativeTouchstartX = startX - relativePositionX
+        state.relativeTouchstartY = startY - relativePositionY
+
+        card.setState = {
+          'relativeTouchstartX': startX - relativePositionX
+        }
+        Vue.set(vueCard.state,'relativeTouchstartX',startX - relativePositionX)
+      }
+      const onMove = function(e) {
+        e.stopPropagation()
+
+        const moveX = e.changedTouches[0].pageX
+        const moveY = e.changedTouches[0].pageY
+        const relativePositionX = state.relativePositionX
+        const relativePositionY = state.relativePositionY
+        const relativeTouchstartX = state.relativeTouchstartX
+        const relativeTouchstartY = state.relativeTouchstartY
+        const relativeMoveX = moveX - relativePositionX - relativeTouchstartX
+        const relativeMoveY = moveY - relativePositionY - relativeTouchstartY
+        const movingDistance = Math.abs(~~(relativeMoveX))
+        const maxDeg = 15
+        const maxMove = state.halfWidth
+        const setDeg = maxDeg * (movingDistance / maxMove)
+
+        state.movingDistance = movingDistance
+        state.lastRelativeMoveX = relativeMoveX
+        state.lastRelativeMoveY = relativeMoveY
+        state.lastDeg = setDeg
+
+        card.setState = {
+          'lastDeg': setDeg
+        }
+        Vue.set(vueCard.state,'lastDeg',setDeg)
+
+        const is_check_sign = Math.sign(relativeMoveX)
+        
+        //const card = new cardStyle(is_check_sign,relativeMoveX,relativeMoveY,setDeg)
+        //card.set
+        /*
+        const setSwipeCardStyle = function(c,x,y,d) {
+          let type = ''
+          if (c === 1) {
+            type = true
+          } else if (c === -1) {
+            type = false
+          }
+          const deg = type ? -d : d
+          const addClass = type ? 'type' : 'nottype'
+          const rmClass = type ? 'nottype' : 'type'
+          el.style.transform = `translate3d(${relativeMoveX}px, ${relativeMoveY}px, 0) rotate(${deg}deg)`
+          el.classList.add(addClass)
+          el.classList.remove(rmClass)
+          state.type = type
+        }
+        */
+
+        //setSwipeCardStyle(is_check_sign,relativeMoveX,relativeMoveY,setDeg)
+      }
+      const onEnd = function(e) {
+        e.stopPropagation()
+        console.log(card.state)
+        console.log(vueCard.state)
+        typeApp.updateCardData()
+      }
+      if (current) {
+        el.addEventListener('touchstart',onTouch)
+        el.addEventListener('touchmove',onMove)
+        el.addEventListener('touchend',onEnd)
+      }
+    }
+  },
+  methods: {
+    async updateCardData(){
+      const vm = this
+      const data = vm.loadedCardData
+      function spliceList() {
+        return new Promise(function(resolve){
+          data.splice(data.length - 1,data.length)
+          resolve()
+        })
+      }
+      function addCard() {
+        const remingList = vm.cardList.length
+        if(remingList < 4) {
+          const addAPI = returnApi2
+          addAPI.forEach(function(a){
+            data.splice(0,0,a)
+          })
+        }
+      }
+      await spliceList()
+            addCard()
     },
+    onType() {
+      console.log(this.cardWrap.querySelector('.current'))
+      this.updateCardData()
+    },
+    onSkip() {
+
+    }
   }
 })
 </script>
