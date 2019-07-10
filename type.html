@@ -190,24 +190,27 @@ const CardItem = Vue.extend({
         'current': this.current,
         'next': this.next
       }
-    }
+    },
   },
   mounted() {
-    const obj = {}
-    obj[this.generateObj.id] = this
     this.$nextTick(function(){
-      //typeApp.cardInstance.unshift(obj)
-      Object.assign(typeApp.cardInstance,obj)
+      this.setInstance()
     })
-
-    //const assignArray = Object.assign(this.state,obj)
+    console.log(this)
   },
   methods: {
+    setInstance() {
+      const obj = {}
+      obj[this.generateObj.id] = this
+      Object.assign(typeApp.cardInstance,obj)
+    },
     onTouch(e) {
       const Card = this.Card
       const startX = e.changedTouches[0].pageX
       const startY = e.changedTouches[0].pageY
+      console.log(e.changedTouches[0])
       console.log(startX)
+      console.log(this.$el.getBoundingClientRect())
     },
     onSwipe() {
 
