@@ -13,8 +13,8 @@
 
 <div id="typeApp">
   <div id="cardUI" ref="cardWrap">
-    <template v-for="(d,i) in cardList" :key="d.id">
-    <div class="card" :class="setOrderClass(i)" v-card>
+    <!--template v-for="(d,i) in cardList" :key="d.id">
+    <div class="card" :data-id="d.id" @touchstart.stop="onTouch">
       <div class="photo"><img :src="d.src" width="100%"></div>
       <div class="status">
         <dl>
@@ -22,7 +22,7 @@
         </dl>
       </div>
     </div>
-    </template>
+    </template-->
   </div>
   <div id="btnUI">
     <a href="#" class="btn skip" @click="onSkip"></a>
@@ -35,108 +35,204 @@
 'use strict'
 const returnApi = [
   {
-    id: 1,
     src: './img/type/mio_1.jpg',
     label: '今田美桜1 19歳 東京都'
   },
   {
-    id: 2,
     src: './img/type/mio_2.jpg',
     label: '今田美桜2 19歳 東京都'
   },
   {
-    id: 3,
     src: './img/type/mio_3.jpg',
     label: '今田美桜3 19歳 東京都'
   },
   {
-    id: 4,
     src: './img/type/mio_1.jpg',
     label: '今田美桜4 19歳 東京都'
   },
   {
-    id: 5,
     src: './img/type/mio_2.jpg',
     label: '今田美桜5 19歳 東京都'
   },
   {
-    id: 6,
     src: './img/type/mio_3.jpg',
     label: '今田美桜6 19歳 東京都'
   }
 ]
 const returnApi2 = [
   {
-    id: 7,
     src: './img/type/mio_1.jpg',
     label: '今田美桜7 19歳 東京都'
   },
   {
-    id: 8,
     src: './img/type/mio_2.jpg',
     label: '今田美桜8 19歳 東京都'
   },
   {
-    id: 9,
     src: './img/type/mio_3.jpg',
     label: '今田美桜9 19歳 東京都'
   },
   {
-    id: 10,
     src: './img/type/mio_1.jpg',
     label: '今田美桜10 19歳 東京都'
   },
   {
-    id: 11,
     src: './img/type/mio_2.jpg',
     label: '今田美桜11 19歳 東京都'
   },
   {
-    id: 12,
     src: './img/type/mio_3.jpg',
     label: '今田美桜12 19歳 東京都'
   }
 ]
-const cardStyle = class {
-  constructor(c,x,y,d) {
-    this.checkSign = c
-    this.moveX = x
-    this.moveY = y
-    this.deg = d
+const CardStyle = class {
+  constructor() {
+    this.maxDeg = 15
+    this.nextScale = 0.8
+    this.reminingScale = 0.2
+    this.preMaxScale = 0.95
     this.type = ''
     this.state = {}
+    this.nextCard = ''
   }
-  get set() {
-    this.create()
-    //return this.type
+  set setNextCard(el) {
+    this.nextCard = el
   }
-  create() {
-    if (this.checkSign === 1) {
+  set setType(c) {
+    if (c === 1) {
       this.type = true
-    } else if (this.checkSign === -1) {
+    } else if (c === -1) {
       this.type = false
     }
-    console.log(this.type)
   }
-  get getState() {
-    return this.state
+  set setTouchState(obj) {
+    const pageXOffset = window.pageXOffset
+    const pageYOffset = window.pageYOffset
+    const rect = obj.clientRect
+    const relativePositionX = rect.left + pageXOffset
+    const relativePositionY = rect.top + pageYOffset
+    const halfWidth = Math.floor(rect.width / 2)
+    this.assign({
+      'relativePositionX': relativePositionX,
+      'relativePositionY': relativePositionY,
+      'halfWidth': halfWidth,
+      'quarterWidth': halfWidth / 2,
+      'relativeTouchstartX': obj.startX - relativePositionX,
+      'relativeTouchstartY': obj.startY - relativePositionY
+    })
   }
-  set setState(v) {
-    this.concat(v)
+  set setRelativeMoveX(v) {
+    const val = v - this.state.relativePositionX - this.state.relativeTouchstartX
+    this.setType = Math.sign(val)
+    this.assign({
+      'relativeMoveX': val,
+      'movingDistance': Math.abs(~~(val))
+    })
   }
-  concat(v) {
-    const assign = Object.assign(this.state,v)
-    this.state = assign
+  set setRelativeMoveY(v) {
+    const val = v - this.state.relativePositionY - this.state.relativeTouchstartY
+    this.assign({
+      'relativeMoveY': val
+    })
+  }
+  swipeScale() {
+    const state = this.state
+    const calScale = this.nextScale + ( this.reminingScale * ( state.movingDistance / state.halfWidth ) )
+    const setScale = calScale < this.preMaxScale ? calScale : this.preMaxScale
+    this.scale(setScale)
+  }
+  assign(obj) {
+    const assignArray = Object.assign(this.state,obj)
+    this.state = assignArray
+  }
+  swipe(el) {
+    const state = this.state
+    const deg = this.maxDeg * (state.movingDistance / state.halfWidth)
+    const setDeg = this.type ? -deg : deg
+    const addClass = this.type ? 'type' : 'nottype'
+    const rmClass = this.type ? 'nottype' : 'type'
+    el.style.transform = `translate3d(${state.relativeMoveX}px, ${state.relativeMoveY}px, 0) rotate(${setDeg}deg)`
+    el.classList.add(addClass)
+    el.classList.remove(rmClass)
+  }
+  scale(scale) {
+    const nextCard = this.nextCard
+    nextCard.style.transform = `scale(${scale})`
   }
 }
 
+const CardItem = Vue.extend({
+  template: `
+    <div class="card" :class="setOrder" :data-id="generateObj.id" @touchstart.stop="onTouch" @touchmove.stop="onSwipe" @touchend.stop="onEnd">
+      <div class="photo"><img :src="generateObj.src" width="100%"></div>
+      <div class="status">
+        <dl>
+          <dt>{{generateObj.label}}-{{generateObj.id}}</dt>
+        </dl>
+      </div>
+    </div>
+  `,
+  data() {
+    return {
+      generateObj: {
+        id: Math.floor( Math.random() * 10000 ),
+        src: '',
+        label: '',
+      },
+      current: false,
+      next: false,
+      Card: new CardStyle()
+    }
+  },
+  computed: {
+    setOrder() {
+      return {
+        'current': this.current,
+        'next': this.next
+      }
+    }
+  },
+  mounted() {
+    const obj = {}
+    obj[this.generateObj.id] = this
+    this.$nextTick(function(){
+      //typeApp.cardInstance.unshift(obj)
+      Object.assign(typeApp.cardInstance,obj)
+    })
+
+    //const assignArray = Object.assign(this.state,obj)
+  },
+  methods: {
+    onTouch(e) {
+      const Card = this.Card
+      const startX = e.changedTouches[0].pageX
+      const startY = e.changedTouches[0].pageY
+      console.log(startX)
+    },
+    onSwipe() {
+
+    },
+    onEnd() {
+      this.onRelease()
+    },
+    onRelease() {
+      vueBus.$emit('onRelease')
+    }
+  }
+})
+
+const vueBus = new Vue()
 const typeApp = new Vue({
   el: '#typeApp',
   data: {
     loadedCardData: '',
+    currentId: '',
+    nextId: '',
+    cardInstance: []
   },
   created() {
-    this.loadedCardData = returnApi.slice().reverse()
+    this.loadedCardData = returnApi
+    vueBus.$on('onRelease',this.onRelease)
   },
   computed: {
     cardList() {
@@ -152,102 +248,62 @@ const typeApp = new Vue({
         }
       }
     },
-    setOrderRefs() {
+    setScale() {
       const length = this.cardList.length
       return function(i) {
-        if((length - i ) === 1) {
-          return 'current'
-        } else if ((length - i ) === 2) {
-          return 'next'
+        const scale = 
+        (length - i ) === 1
+        ? 'scale(1)'
+        : (length - i ) === 2
+          ? 'scale(0.8)' 
+          : 'scale(0.7)'
+        return {
+          transform: scale
         }
       }
     },
     cardWrap() {
       return this.$refs.cardWrap
-    },
+    }
+  },
+  mounted(){
+    this.setCardList(this.cardList,'mount')
+    this.$nextTick(function(){
+    })
   },
   directives: {
     card(el,binding) {
       const current = el.classList.contains('current')
-      const state = {}
       const onTouch = function(e) {
         e.stopPropagation()
-
         const startX = e.changedTouches[0].pageX
         const startY = e.changedTouches[0].pageY
-        const clientRect = el.getBoundingClientRect()
-        const relativePositionX = clientRect.left + window.pageXOffset
-        const relativePositionY = clientRect.top + window.pageYOffset
-        const halfWidth = Math.floor(clientRect.width / 2)
-
-        state.relativePositionX = relativePositionX
-        state.relativePositionY =  relativePositionY
-        state.halfWidth = halfWidth
-        state.quarterWidth = halfWidth / 2
-        state.relativeTouchstartX = startX - relativePositionX
-        state.relativeTouchstartY = startY - relativePositionY
-
-        card.setState = {
-          'relativeTouchstartX': startX - relativePositionX
+        Card.setTouchState = {
+          'clientRect': el.getBoundingClientRect(),
+          'startX': startX,
+          'startY': startY
         }
+        el.style.transition = null
+        Card.setNextCard = el.previousElementSibling
+        Card.nextCard.style.transition = '.2s'
       }
       const onMove = function(e) {
         e.stopPropagation()
 
         const moveX = e.changedTouches[0].pageX
         const moveY = e.changedTouches[0].pageY
-        const relativePositionX = state.relativePositionX
-        const relativePositionY = state.relativePositionY
-        const relativeTouchstartX = state.relativeTouchstartX
-        const relativeTouchstartY = state.relativeTouchstartY
-        const relativeMoveX = moveX - relativePositionX - relativeTouchstartX
-        const relativeMoveY = moveY - relativePositionY - relativeTouchstartY
-        const movingDistance = Math.abs(~~(relativeMoveX))
-        const maxDeg = 15
-        const maxMove = state.halfWidth
-        const setDeg = maxDeg * (movingDistance / maxMove)
-
-        state.movingDistance = movingDistance
-        state.lastRelativeMoveX = relativeMoveX
-        state.lastRelativeMoveY = relativeMoveY
-        state.lastDeg = setDeg
-
-        card.setState = {
-          'lastDeg': setDeg
-        }
-
-        const is_check_sign = Math.sign(relativeMoveX)
-        
-        //const card = new cardStyle(is_check_sign,relativeMoveX,relativeMoveY,setDeg)
-        //card.set
-        /*
-        const setSwipeCardStyle = function(c,x,y,d) {
-          let type = ''
-          if (c === 1) {
-            type = true
-          } else if (c === -1) {
-            type = false
-          }
-          const deg = type ? -d : d
-          const addClass = type ? 'type' : 'nottype'
-          const rmClass = type ? 'nottype' : 'type'
-          el.style.transform = `translate3d(${relativeMoveX}px, ${relativeMoveY}px, 0) rotate(${deg}deg)`
-          el.classList.add(addClass)
-          el.classList.remove(rmClass)
-          state.type = type
-        }
-        */
-
-        //setSwipeCardStyle(is_check_sign,relativeMoveX,relativeMoveY,setDeg)
+        Card.setRelativeMoveX = moveX
+        Card.setRelativeMoveY = moveY
+        Card.swipe(el)
+        Card.swipeScale()
       }
       const onEnd = function(e) {
         e.stopPropagation()
-        console.log(card.state)
         typeApp.updateCardData()
       }
-      if (current) {
-        var card = new cardStyle()
-        console.log(card)
+      if(current) {
+        var Card = new CardStyle()
+        console.log('up')
         el.addEventListener('touchstart',onTouch)
         el.addEventListener('touchmove',onMove)
         el.addEventListener('touchend',onEnd)
@@ -255,7 +311,44 @@ const typeApp = new Vue({
     }
   },
   methods: {
-    async updateCardData(){
+    setCardList(data,lifeCycle) {
+      const vm = this
+      const cardWrap = vm.cardWrap
+      const isMount = (lifeCycle == 'mount')
+      data.forEach(function(d,i){
+        let cardItem = new CardItem()
+        cardItem.generateObj.src = d.src
+        cardItem.generateObj.label = d.label
+        if (isMount) {
+          if (i === 0) {
+            cardItem.current = true
+            vm.currentId = cardItem.generateObj.id
+          } else if (i === 1) {
+            cardItem.next = true
+            vm.nextId = cardItem.generateObj.id
+          }
+        }
+        cardItem.$mount()
+        cardWrap.insertBefore(cardItem.$el,cardWrap.firstChild);
+      })
+    },
+    onTouch(e) {
+      const el = e.target
+      console.log(el)
+      console.log(el.previousElementSibling)
+      //console.log(e.target.previousElementSibling)
+      //this.updateCardData(e.target)
+      el.parentNode.removeChild(el)
+      const cardLength = this.cardWrap.querySelectorAll('.card').length
+      if (cardLength < 4) {
+        const addAPI = returnApi2
+        this.setCardList(addAPI,'add')
+      }
+    },
+    onRelease() {
+      console.log('release')
+    },
+    async updateCardData(t){
       const vm = this
       const data = vm.loadedCardData
       function spliceList() {
@@ -268,17 +361,17 @@ const typeApp = new Vue({
         const remingList = vm.cardList.length
         if(remingList < 4) {
           const addAPI = returnApi2
-          addAPI.forEach(function(a){
-            data.splice(0,0,a)
+          addAPI.forEach(function(item){
+            data.splice(0,0,item)
           })
         }
       }
       await spliceList()
-            addCard()
+      await addCard()
+      console.log(t)
     },
     onType() {
-      console.log(this.cardWrap.querySelector('.current'))
-      this.updateCardData()
+      const card = this.cardInstance[this.currentId]
     },
     onSkip() {
 
