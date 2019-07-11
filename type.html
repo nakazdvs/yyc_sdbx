@@ -86,7 +86,8 @@ const returnApi2 = [
   }
 ]
 const CardStyle = class {
-  constructor() {
+  constructor(vm) {
+    this.vm = vm
     this.maxDeg = 15
     this.nextScale = 0.8
     this.reminingScale = 0.2
@@ -163,7 +164,7 @@ const CardStyle = class {
 
 const CardItem = Vue.extend({
   template: `
-    <div class="card" :class="setOrder" :data-id="generateObj.id" @touchstart.stop="onTouch" @touchmove.stop="onSwipe" @touchend.stop="onEnd">
+    <div class="card" :class="setOrder" :data-id="generateObj.id" @touchstart.stop="onTouch" @touchmove.stop="onSwipe" @touchend.stop="onEnd" :style="transForm">
       <div class="photo"><img :src="generateObj.src" width="100%"></div>
       <div class="status">
         <dl>
@@ -181,7 +182,8 @@ const CardItem = Vue.extend({
       },
       current: false,
       next: false,
-      Card: new CardStyle()
+      Card: new CardStyle(this),
+      scale: .1
     }
   },
   computed: {
@@ -191,12 +193,16 @@ const CardItem = Vue.extend({
         'next': this.next
       }
     },
+    transForm() {
+      return {
+        transform:`scale(${this.scale}) rotate(10deg)`,
+      }
+    }
   },
   mounted() {
     this.$nextTick(function(){
       this.setInstance()
     })
-    console.log(this)
   },
   methods: {
     setInstance() {
