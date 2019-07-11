@@ -88,6 +88,9 @@ const returnApi2 = [
 const CardStyle = class {
   constructor(vm) {
     this.vm = vm
+    this.clientWidth = Math.ceil(vm.clientData.width)
+    this.clientTop = Math.ceil(vm.clientData.top)
+    this.clientLeft = Math.ceil(vm.clientData.left)
     this.maxDeg = 15
     this.nextScale = 0.8
     this.reminingScale = 0.2
@@ -164,7 +167,7 @@ const CardStyle = class {
 
 const CardItem = Vue.extend({
   template: `
-    <div class="card" :class="setOrder" :data-id="generateObj.id" @touchstart.stop="onTouch" @touchmove.stop="onSwipe" @touchend.stop="onEnd" :style="transForm">
+    <div class="card" :class="[setOrder,addClass]" :data-id="generateObj.id" @touchstart.stop="onTouch" @touchmove.stop="onSwipe" @touchend.stop="onEnd" :style="transForm">
       <div class="photo"><img :src="generateObj.src" width="100%"></div>
       <div class="status">
         <dl>
@@ -182,8 +185,32 @@ const CardItem = Vue.extend({
       },
       current: false,
       next: false,
-      Card: new CardStyle(this),
-      scale: .1
+      type: '',
+      //Card: '',
+      clientData: {
+        width: '',
+        left: '',
+        top: '',
+        halfWidth: '',
+        quarterWidth: ''
+      },
+      setTransform: {
+        translateX: '',
+        translateY: '',
+        rotate: 0,
+        scale: 1.0
+      },
+      cardModel: {
+        maxDeg: 15,
+        nextScale: 0.8,
+        reminingScale: 0.2,
+        preMaxScale: 0.95,
+        relativeStartX: '',
+        relativeStartY: '',
+        movingDistance: '',
+        relativeMoveX: '',
+        relativeMoveY: ''
+      }
     }
   },
   computed: {
@@ -193,32 +220,69 @@ const CardItem = Vue.extend({
         'next': this.next
       }
     },
-    transForm() {
+    addClass() {
       return {
-        transform:`scale(${this.scale}) rotate(10deg)`,
+        'type': this.type === 1 ,
+        'nottype': this.type === -1
+      }
+    },
+    transForm() {
+      const s = this.setTransform
+      return {
+        transform:`translate3d(${s.translateX}px,${s.translateY}px,0) rotate(${s.rotate}deg) scale(${s.scale})`
       }
     }
   },
   mounted() {
     this.$nextTick(function(){
       this.setInstance()
+      this.setClientData()
+      //this.Card = new CardStyle(this)
     })
   },
   methods: {
+    setClientData() {
+      const clientRect = this.$el.getBoundingClientRect()
+      this.clientData.width = clientRect.width
+      this.clientData.left = clientRect.left
+      this.clientData.top = clientRect.top
+      this.clientData.halfWidth = clientRect.width / 2
+      this.clientData.quarterWidth = clientRect.width / 4
+    },
     setInstance() {
       const obj = {}
       obj[this.generateObj.id] = this
       Object.assign(typeApp.cardInstance,obj)
     },
     onTouch(e) {
-      const Card = this.Card
+      const Card = this.cardModel
+      const cliendData = this.clientData
       const startX = e.changedTouches[0].pageX
       const startY = e.changedTouches[0].pageY
-      console.log(e.changedTouches[0])
-      console.log(startX)
-      console.log(this.$el.getBoundingClientRect())
+
+      Card.relativeStartX = (startX - cliendData.left)
+      Card.relativeStartY = (startY - cliendData.top)
     },
-    onSwipe() {
+    onSwipe(e) {
+      const Card = this.cardModel
+      const cliendData = this.clientData
+      const transform = this.setTransform
+      const moveX = e.changedTouches[0].pageX
+      const moveY = e.changedTouches[0].pageY
+
+      Card.relativeMoveX = (moveX - cliendData.left - Card.relativeStartX)
+      Card.relativeMoveY = (moveY - cliendData.top - Card.relativeStartY)
+      this.type = Math.sign(Card.relativeMoveX)
+      Card.movingDistance = Math.abs(~~(Card.relativeMoveX))
+
+      const deg = Card.maxDeg * (Card.movingDistance / cliendData.halfWidth)
+      const setDeg = (this.type === 1 ? -deg : deg)
+
+      transform.translateX = Card.relativeMoveX
+      transform.translateY = Card.relativeMoveY
+      transform.rotate = setDeg
+      console.log(deg)
+      console.log(this.type)
 
     },
     onEnd() {
@@ -237,7 +301,7 @@ const typeApp = new Vue({
     loadedCardData: '',
     currentId: '',
     nextId: '',
-    cardInstance: []
+    cardInstance: [],
   },
   created() {
     this.loadedCardData = returnApi
