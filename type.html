@@ -35,26 +35,32 @@
 'use strict'
 const returnApi = [
   {
+    //id: '11284',
     src: './img/type/mio_1.jpg',
     label: '今田美桜1 19歳 東京都'
   },
   {
+    //id: '9980',
     src: './img/type/mio_2.jpg',
     label: '今田美桜2 19歳 東京都'
   },
   {
+    //id: '662',
     src: './img/type/mio_3.jpg',
     label: '今田美桜3 19歳 東京都'
   },
   {
+    //id: '11130',
     src: './img/type/mio_1.jpg',
     label: '今田美桜4 19歳 東京都'
   },
   {
+    //id: '23',
     src: './img/type/mio_2.jpg',
     label: '今田美桜5 19歳 東京都'
   },
   {
+    //id: '9999',
     src: './img/type/mio_3.jpg',
     label: '今田美桜6 19歳 東京都'
   }
@@ -167,7 +173,7 @@ const CardStyle = class {
 
 const CardItem = Vue.extend({
   template: `
-    <div class="card" :class="[setOrder,addClass]" :data-id="generateObj.id" @touchstart.stop="onTouch" @touchmove.stop="onSwipe" @touchend.stop="onEnd" :style="transForm">
+    <div class="card" :class="[setOrder,addClass]" :data-id="generateObj.id" @touchstart.stop="onTouch" @touchmove.stop="onSwipe" @touchend.stop="onEnd" :style="transForm" v-if="!released">
       <div class="photo"><img :src="generateObj.src" width="100%"></div>
       <div class="status">
         <dl>
@@ -180,13 +186,13 @@ const CardItem = Vue.extend({
     return {
       generateObj: {
         id: Math.floor( Math.random() * 10000 ),
+        //id: '',
         src: '',
         label: '',
       },
       current: false,
       next: false,
       type: '',
-      //Card: '',
       clientData: {
         width: '',
         left: '',
@@ -195,12 +201,15 @@ const CardItem = Vue.extend({
         quarterWidth: ''
       },
       setTransform: {
+        transition: '',
         translateX: '',
         translateY: '',
         rotate: 0,
-        scale: 1.0
+        scale: 1.0,
+        opacity: ''
       },
       cardModel: {
+        transitionDuration: .2,
         maxDeg: 15,
         nextScale: 0.8,
         reminingScale: 0.2,
@@ -209,8 +218,11 @@ const CardItem = Vue.extend({
         relativeStartY: '',
         movingDistance: '',
         relativeMoveX: '',
-        relativeMoveY: ''
-      }
+        relativeMoveY: '',
+        fallDistanceX: 80,
+        fallDistanceY: 80,
+      },
+      released: false
     }
   },
   computed: {
@@ -229,7 +241,9 @@ const CardItem = Vue.extend({
     transForm() {
       const s = this.setTransform
       return {
-        transform:`translate3d(${s.translateX}px,${s.translateY}px,0) rotate(${s.rotate}deg) scale(${s.scale})`
+        transitionDuration: `${s.transition}s`,
+        transform:`translate3d(${s.translateX}px,${s.translateY}px,0) rotate(${s.rotate}deg) scale(${s.scale})`,
+        opacity: s.opacity
       }
     }
   },
@@ -238,6 +252,7 @@ const CardItem = Vue.extend({
       this.setInstance()
       this.setClientData()
       //this.Card = new CardStyle(this)
+      console.log(typeApp.cardInstance)
     })
   },
   methods: {
@@ -251,8 +266,11 @@ const CardItem = Vue.extend({
     },
     setInstance() {
       const obj = {}
+      /*
       obj[this.generateObj.id] = this
       Object.assign(typeApp.cardInstance,obj)
+      */
+      typeApp.cardInstance.splice(0,0,this)
     },
     onTouch(e) {
       const Card = this.cardModel
@@ -281,15 +299,37 @@ const CardItem = Vue.extend({
       transform.translateX = Card.relativeMoveX
       transform.translateY = Card.relativeMoveY
       transform.rotate = setDeg
-      console.log(deg)
-      console.log(this.type)
 
     },
-    onEnd() {
-      this.onRelease()
+    onEnd(e) {
+      const Card = this.cardModel
+      const cliendData = this.clientData
+      const transform = this.setTransform
+
+      transform.transition = Card.transitionDuration
+      const setTimeoutDuration = transform.transition * 1000
+      if (Card.movingDistance > cliendData.quarterWidth) {
+        const releaseMoveX = transform.translateX + (this.type === 1 ? Card.fallDistanceX : -Card.fallDistanceX)
+        const releaseMoveY = transform.translateY + Card.fallDistanceY
+        transform.translateX = releaseMoveX
+        transform.translateY = releaseMoveY
+        transform.opacity = 0
+        setTimeout(function(){
+          this.onRelease()
+        }.bind(this),setTimeoutDuration)
+      } else {
+        transform.translateX = 0
+        transform.translateY = 0
+        transform.rotate = 0
+        setTimeout(function(){
+          this.type = 0
+          transform.transition = 0
+        }.bind(this),setTimeoutDuration)
+        
+      }
     },
     onRelease() {
-      vueBus.$emit('onRelease')
+      vueBus.$emit('onRelease',this.generateObj.id)
     }
   }
 })
@@ -311,30 +351,6 @@ const typeApp = new Vue({
     cardList() {
       return this.loadedCardData
     },
-    setOrderClass() {
-      const length = this.cardList.length
-      return function(i) {
-        if((length - i ) === 1) {
-          return 'current'
-        } else if ((length - i ) === 2) {
-          return 'next'
-        }
-      }
-    },
-    setScale() {
-      const length = this.cardList.length
-      return function(i) {
-        const scale = 
-        (length - i ) === 1
-        ? 'scale(1)'
-        : (length - i ) === 2
-          ? 'scale(0.8)' 
-          : 'scale(0.7)'
-        return {
-          transform: scale
-        }
-      }
-    },
     cardWrap() {
       return this.$refs.cardWrap
     }
@@ -344,44 +360,8 @@ const typeApp = new Vue({
     this.$nextTick(function(){
     })
   },
-  directives: {
-    card(el,binding) {
-      const current = el.classList.contains('current')
-      const onTouch = function(e) {
-        e.stopPropagation()
-        const startX = e.changedTouches[0].pageX
-        const startY = e.changedTouches[0].pageY
-        Card.setTouchState = {
-          'clientRect': el.getBoundingClientRect(),
-          'startX': startX,
-          'startY': startY
-        }
-        el.style.transition = null
-        Card.setNextCard = el.previousElementSibling
-        Card.nextCard.style.transition = '.2s'
-      }
-      const onMove = function(e) {
-        e.stopPropagation()
-
-        const moveX = e.changedTouches[0].pageX
-        const moveY = e.changedTouches[0].pageY
-        Card.setRelativeMoveX = moveX
-        Card.setRelativeMoveY = moveY
-        Card.swipe(el)
-        Card.swipeScale()
-      }
-      const onEnd = function(e) {
-        e.stopPropagation()
-        typeApp.updateCardData()
-      }
-      if(current) {
-        var Card = new CardStyle()
-        console.log('up')
-        el.addEventListener('touchstart',onTouch)
-        el.addEventListener('touchmove',onMove)
-        el.addEventListener('touchend',onEnd)
-      }
-    }
+  updated() {
+    console.log('up')
   },
   methods: {
     setCardList(data,lifeCycle) {
@@ -390,6 +370,7 @@ const typeApp = new Vue({
       const isMount = (lifeCycle == 'mount')
       data.forEach(function(d,i){
         let cardItem = new CardItem()
+        //cardItem.generateObj.id = d.id
         cardItem.generateObj.src = d.src
         cardItem.generateObj.label = d.label
         if (isMount) {
@@ -405,46 +386,23 @@ const typeApp = new Vue({
         cardWrap.insertBefore(cardItem.$el,cardWrap.firstChild);
       })
     },
-    onTouch(e) {
-      const el = e.target
-      console.log(el)
-      console.log(el.previousElementSibling)
-      //console.log(e.target.previousElementSibling)
-      //this.updateCardData(e.target)
-      el.parentNode.removeChild(el)
-      const cardLength = this.cardWrap.querySelectorAll('.card').length
-      if (cardLength < 4) {
-        const addAPI = returnApi2
-        this.setCardList(addAPI,'add')
-      }
-    },
-    onRelease() {
-      console.log('release')
-    },
-    async updateCardData(t){
-      const vm = this
-      const data = vm.loadedCardData
-      function spliceList() {
-        return new Promise(function(resolve){
-          data.splice(data.length - 1,data.length)
-          resolve()
-        })
-      }
-      function addCard() {
-        const remingList = vm.cardList.length
-        if(remingList < 4) {
-          const addAPI = returnApi2
-          addAPI.forEach(function(item){
-            data.splice(0,0,item)
-          })
+    onRelease(id) {
+      const cardInstance = this.cardInstance
+      cardInstance.forEach(function(item, i){
+        if (item.generateObj.id === id) {
+          //console.log(item)
+          //console.log(i)
+          item.released = true
+          //item.$destroy()
+          cardInstance.splice(i,1)
         }
+      })
+      if (cardInstance.length < 3) {
+        this.setCardList(returnApi2)
       }
-      await spliceList()
-      await addCard()
-      console.log(t)
     },
     onType() {
-      const card = this.cardInstance[this.currentId]
+      //const card = this.cardInstance[this.currentId]
     },
     onSkip() {
 
