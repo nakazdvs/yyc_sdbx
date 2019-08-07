@@ -252,6 +252,7 @@ const CardItem = Vue.extend({
       this.setInstance()
       this.setClientData()
       //this.Card = new CardStyle(this)
+      console.log('mount')
       console.log(typeApp.cardInstance)
     })
   },
@@ -265,7 +266,7 @@ const CardItem = Vue.extend({
       this.clientData.quarterWidth = clientRect.width / 4
     },
     setInstance() {
-      const obj = {}
+      //const obj = {}
       /*
       obj[this.generateObj.id] = this
       Object.assign(typeApp.cardInstance,obj)
@@ -359,9 +360,6 @@ const typeApp = new Vue({
     this.setCardList(this.cardList,'mount')
     this.$nextTick(function(){
     })
-  },
-  updated() {
-    console.log('up')
   },
   methods: {
     setCardList(data,lifeCycle) {
