@@ -359,7 +359,7 @@ const CardItem = Vue.extend({
       const slideTransformOrigin = clientData.height * 3 + 'px'
 
       transform.origin = slideTransformOrigin
-      vueBus.$emit('onAfterSlide')
+      vueBus.$emit('onAfterSlide',Card.slidedScaleDuration)
       this.$el.addEventListener('animationend',() => {
         vueBus.$emit('onRelease')
       })
@@ -383,7 +383,7 @@ const CardItem = Vue.extend({
         setTimeout(() => {
           (async () => {
             await vueBus.$emit('onRelease')
-            vueBus.$emit('onAfterSwipe',1,2,Card.swipedScaleDuration)
+            vueBus.$emit('onAfterSwipe',Card.swipedScaleDuration)
           })()
         },setTimeoutDuration)
         
@@ -410,8 +410,6 @@ const typeApp = new Vue({
   data: {
     loadedCardData: '',
     currentId: '',
-    xcurrentId: '',
-    isSlide: false,
     cardInstance: [],
     btnTypeScale: '',
     btnNottypeScale: ''
@@ -471,13 +469,13 @@ const typeApp = new Vue({
       })
     },
     findObj(ins) {
-      const currentId = this.isSlide ? this.xcurrentId : this.currentId
+      const currentId = this.currentId
       return ins.generateObj.id === currentId
     },
-    onAfterSwipe(current,next,duration) {
+    onAfterSwipe(duration) {
       const cardInstance = this.cardInstance
-      const nextInstance = cardInstance[cardInstance.length - current]
-      const skipInstance = cardInstance[cardInstance.length - next]
+      const nextInstance = cardInstance[cardInstance.length - 1]
+      const skipInstance = cardInstance[cardInstance.length - 2]
 
       nextInstance.next = false
       nextInstance.current = true
@@ -489,24 +487,19 @@ const typeApp = new Vue({
       this.btnTypeScale = 1
       this.btnNottypeScale = 1
     },
-    onAfterSlide() {
+    onAfterSlide(duration) {
       const cardInstance = this.cardInstance
       const currentInstance = cardInstance[cardInstance.length - 1]
       const nextInstance = cardInstance[cardInstance.length - 2]
       const skipInstance = cardInstance[cardInstance.length - 3]
 
-      console.log(currentInstance)
-      console.log(nextInstance)
-      console.log(skipInstance)
-
       nextInstance.next = false
       nextInstance.current = true
-      Vue.set(nextInstance.setTransform, 'transition', .7)
+      Vue.set(nextInstance.setTransform, 'transition', duration)
       Vue.set(nextInstance.setTransform, 'scale', 1)
       skipInstance.next = true
 
       this.currentId = currentInstance.generateObj.id
-      console.log(this.currentId)
 
     },
     onRelease(id) {
