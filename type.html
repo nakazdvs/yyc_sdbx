@@ -515,21 +515,19 @@ const typeApp = new Vue({
         const item = cardInstance.find(this.findObj)
         const itemIndex = cardInstance.findIndex(this.findObj)
         item.released = true
-        console.log(itemIndex)
-        /*
         item.$el.parentNode.removeChild(item.$el)
         item.$destroy()
         cardInstance.splice(itemIndex,1)
         if (cardInstance.length < 3) {
           this.setCardList(returnApi2)
         }
-        */
         resolve()
       })
     },
     onButton(n) {
       const cardInstance = this.cardInstance
-      const item = cardInstance.find(this.findObj)
+      const item = cardInstance[cardInstance.length - 1]
+      Vue.set(item.setTransform,'transition',0)
       item.type = n
       item.slideType = n
       Vue.set(item.setTransform,'overlayOpacity',item.cardModel.moveOpacity)
