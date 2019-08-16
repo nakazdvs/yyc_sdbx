@@ -40,8 +40,7 @@ a {
           transform: translate3d(0, 0, 0);
 }
 
-#cardUI .card::before {
-  content: "";
+#cardUI .card .overlay {
   display: block;
   position: absolute;
   top: 0;
@@ -52,21 +51,34 @@ a {
   transition: .1s;
 }
 
-#cardUI .card.type::before {
+#cardUI .card .overlay::before {
+  display: block;
+}
+
+#cardUI .card.type .overlay {
+  background-color: #f00;
+}
+
+#cardUI .card.type .overlay::before {
   content: "いいかも！";
+  color: #fff;
   font-size: 20px;
-  background-color: rgba(255, 0, 0, 0.3);
 }
 
-#cardUI .card.nottype::before {
+#cardUI .card.nottype .overlay {
+  background-color: #333;
+}
+
+#cardUI .card.nottype .overlay::before {
   content: "いまいち…";
+  color: #fff;
   font-size: 20px;
-  background-color: rgba(51, 51, 51, 0.3);
+  text-align: right;
 }
 
-#cardUI .card.move_type {
-  -webkit-animation: type 0.3s 0.3s ease-in-out forwards;
-          animation: type 0.3s 0.3s ease-in-out forwards;
+#cardUI .card.slide_type {
+  -webkit-animation: type 0.3s ease-in-out forwards;
+          animation: type 0.3s ease-in-out forwards;
 }
 
 @-webkit-keyframes type {
@@ -88,6 +100,33 @@ a {
   99.9%, to {
     -webkit-transform: rotate(45deg);
             transform: rotate(45deg);
+  }
+}
+
+#cardUI .card.slide_nottype {
+  -webkit-animation: nottype 0.3s ease-in-out forwards;
+          animation: nottype 0.3s ease-in-out forwards;
+}
+
+@-webkit-keyframes nottype {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  99.9%, to {
+    -webkit-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+  }
+}
+
+@keyframes nottype {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  99.9%, to {
+    -webkit-transform: rotate(-45deg);
+            transform: rotate(-45deg);
   }
 }
 

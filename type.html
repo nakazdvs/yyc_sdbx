@@ -25,8 +25,8 @@
     </template-->
   </div>
   <div id="btnUI">
-    <a href="#" class="btn skip" @click="onSkip"></a>
-    <a href="#" class="btn type" @click="onType"></a>
+    <a href="#" class="btn skip" @click="onSkip" :style="btnScaleNottype"></a>
+    <a href="#" class="btn type" @click="onType" :style="btnScaleType"></a>
   </div>
 </div>
 
@@ -91,6 +91,7 @@ const returnApi2 = [
     label: '今田美桜12 19歳 東京都'
   }
 ]
+/*
 const CardStyle = class {
   constructor(vm) {
     this.vm = vm
@@ -170,16 +171,26 @@ const CardStyle = class {
     nextCard.style.transform = `scale(${scale})`
   }
 }
+*/
 
 const CardItem = Vue.extend({
   template: `
-    <div class="card" :class="[setOrder,addClass]" :data-id="generateObj.id" @touchstart.stop="onTouch" @touchmove.stop="onSwipe" @touchend.stop="onEnd" :style="transForm" v-if="!released">
+    <div class="card"
+        :class="[setOrder,addClass,addSlideClass]"
+        :data-id="generateObj.id"
+        @touchstart.stop="onTouch"
+        @touchmove.stop.prevent="onSwipe"
+        @touchend.stop="onEnd"
+        :style="transForm" 
+        v-if="!released"
+    >
       <div class="photo"><img :src="generateObj.src" width="100%"></div>
       <div class="status">
         <dl>
           <dt>{{generateObj.label}}-{{generateObj.id}}</dt>
         </dl>
       </div>
+      <span class="overlay" :style="opacity"></span>
     </div>
   `,
   data() {
@@ -193,27 +204,33 @@ const CardItem = Vue.extend({
       current: false,
       next: false,
       type: '',
+      slideType: '',
       clientData: {
         width: '',
+        height: '',
         left: '',
         top: '',
         halfWidth: '',
         quarterWidth: ''
       },
       setTransform: {
+        origin: '',
         transition: '',
         translateX: '',
         translateY: '',
         rotate: 0,
         scale: 1.0,
-        opacity: ''
+        cardOpacity: '',
+        overlayOpacity: 0
       },
       cardModel: {
         transitionDuration: .2,
         maxDeg: 15,
-        nextScale: 0.8,
-        reminingScale: 0.2,
-        preMaxScale: 0.95,
+        moveScale: 0.1,
+        moveOpacity: 0.5,
+        nextScale: 0.9,
+        reminingNextScale: 0.1,
+        //preMaxScale: 0.95,
         relativeStartX: '',
         relativeStartY: '',
         movingDistance: '',
@@ -221,8 +238,12 @@ const CardItem = Vue.extend({
         relativeMoveY: '',
         fallDistanceX: 80,
         fallDistanceY: 80,
+        reminingBtnMaxScale: 0.15,
+        swipedScaleDuration: .3,
+        slidedScaleDuration: .7
       },
-      released: false
+      released: false,
+      nextInstance: ''
     }
   },
   computed: {
@@ -238,12 +259,29 @@ const CardItem = Vue.extend({
         'nottype': this.type === -1
       }
     },
+    addSlideClass() {
+      return {
+        'slide_type': this.slideType === 1,
+        'slide_nottype': this.slideType === -1,
+      }
+    },
     transForm() {
       const s = this.setTransform
+      const origin = s.origin ? `center ${s.origin}` : ''
+      const translate = (s.translateX || s.translateY) ? `translate3d(${s.translateX}px,${s.translateY}px,0)` : ''
+      const rotate = s.rotate ? `rotate(${s.rotate}deg)` : ''
+      const scale = s.scale ? `scale(${s.scale})` : ''
       return {
+        transformOrigin: origin,
         transitionDuration: `${s.transition}s`,
-        transform:`translate3d(${s.translateX}px,${s.translateY}px,0) rotate(${s.rotate}deg) scale(${s.scale})`,
-        opacity: s.opacity
+        transform:`${translate} ${rotate} ${scale}`,
+        opacity: s.cardOpacity
+      }
+    },
+    opacity() {
+      const s = this.setTransform
+      return {
+        opacity: s.overlayOpacity 
       }
     }
   },
@@ -251,86 +289,117 @@ const CardItem = Vue.extend({
     this.$nextTick(function(){
       this.setInstance()
       this.setClientData()
-      //this.Card = new CardStyle(this)
-      console.log('mount')
-      console.log(typeApp.cardInstance)
     })
   },
   methods: {
     setClientData() {
       const clientRect = this.$el.getBoundingClientRect()
       this.clientData.width = clientRect.width
+      this.clientData.height = clientRect.height
       this.clientData.left = clientRect.left
       this.clientData.top = clientRect.top
       this.clientData.halfWidth = clientRect.width / 2
       this.clientData.quarterWidth = clientRect.width / 4
     },
     setInstance() {
-      //const obj = {}
-      /*
-      obj[this.generateObj.id] = this
-      Object.assign(typeApp.cardInstance,obj)
-      */
       typeApp.cardInstance.splice(0,0,this)
     },
     onTouch(e) {
+      this.$set(this.setTransform,'transition',0)
+      this.nextInstance = typeApp.cardInstance[typeApp.cardInstance.length - 2]
+
       const Card = this.cardModel
-      const cliendData = this.clientData
+      const clientData = this.clientData
       const startX = e.changedTouches[0].pageX
       const startY = e.changedTouches[0].pageY
 
-      Card.relativeStartX = (startX - cliendData.left)
-      Card.relativeStartY = (startY - cliendData.top)
+      Card.relativeStartX = (startX - clientData.left)
+      Card.relativeStartY = (startY - clientData.top)
     },
     onSwipe(e) {
       const Card = this.cardModel
-      const cliendData = this.clientData
+      const clientData = this.clientData
       const transform = this.setTransform
       const moveX = e.changedTouches[0].pageX
       const moveY = e.changedTouches[0].pageY
 
-      Card.relativeMoveX = (moveX - cliendData.left - Card.relativeStartX)
-      Card.relativeMoveY = (moveY - cliendData.top - Card.relativeStartY)
+      Card.relativeMoveX = (moveX - clientData.left - Card.relativeStartX)
+      Card.relativeMoveY = (moveY - clientData.top - Card.relativeStartY)
       this.type = Math.sign(Card.relativeMoveX)
       Card.movingDistance = Math.abs(~~(Card.relativeMoveX))
 
-      const deg = Card.maxDeg * (Card.movingDistance / cliendData.halfWidth)
+      const ratio = (Card.movingDistance / clientData.halfWidth)
+      const deg = Card.maxDeg * ratio
       const setDeg = (this.type === 1 ? -deg : deg)
+      const setScale = (1 - (Card.moveScale * ratio))
+      const calcOpacity = Card.moveOpacity * ratio
+      const setOpacity = calcOpacity > Card.moveOpacity ? Card.moveOpacity : calcOpacity
+
+      const setBtnScale = 1 + (Card.reminingBtnMaxScale * ratio)
+      vueBus.$emit('changeScale',{
+        scale: setBtnScale,
+        type: this.type
+      })
+
+      const calcNextScale = Card.nextScale + (Card.reminingNextScale * ratio)
+      const setNextScale = calcNextScale < 1 ? calcNextScale : 1
+      Vue.set(this.nextInstance.setTransform, 'scale', setNextScale)
 
       transform.translateX = Card.relativeMoveX
       transform.translateY = Card.relativeMoveY
       transform.rotate = setDeg
+      transform.scale = setScale
+      transform.overlayOpacity = setOpacity
 
+    },
+    onSlide() {
+      const Card = this.cardModel
+      const clientData = this.clientData
+      const transform = this.setTransform
+      const slideTransformOrigin = clientData.height * 3 + 'px'
+
+      transform.origin = slideTransformOrigin
+      vueBus.$emit('onAfterSlide')
+      this.$el.addEventListener('animationend',() => {
+        vueBus.$emit('onRelease')
+      })
+      //setTimeout(() => this.onRelease(),200 )
     },
     onEnd(e) {
       const Card = this.cardModel
-      const cliendData = this.clientData
+      const clientData = this.clientData
       const transform = this.setTransform
 
       transform.transition = Card.transitionDuration
-      const setTimeoutDuration = transform.transition * 1000
-      if (Card.movingDistance > cliendData.quarterWidth) {
+      const setTimeoutDuration = Card.transitionDuration * 1000
+      if (Card.movingDistance > clientData.quarterWidth) {
         const releaseMoveX = transform.translateX + (this.type === 1 ? Card.fallDistanceX : -Card.fallDistanceX)
         const releaseMoveY = transform.translateY + Card.fallDistanceY
         transform.translateX = releaseMoveX
         transform.translateY = releaseMoveY
-        transform.opacity = 0
-        setTimeout(function(){
-          this.onRelease()
-        }.bind(this),setTimeoutDuration)
+        transform.cardOpacity = 0
+
+        //setTimeout(() => this.onRelease(),setTimeoutDuration )
+        setTimeout(() => {
+          (async () => {
+            await vueBus.$emit('onRelease')
+            vueBus.$emit('onAfterSwipe',1,2,Card.swipedScaleDuration)
+          })()
+        },setTimeoutDuration)
+        
       } else {
         transform.translateX = 0
         transform.translateY = 0
         transform.rotate = 0
-        setTimeout(function(){
+        transform.scale = 1
+
+        setTimeout(() => {
           this.type = 0
           transform.transition = 0
-        }.bind(this),setTimeoutDuration)
+          Vue.set(this.nextInstance.setTransform, 'scale', Card.nextScale)
+        },setTimeoutDuration)
         
       }
-    },
-    onRelease() {
-      vueBus.$emit('onRelease',this.generateObj.id)
     }
   }
 })
@@ -341,12 +410,18 @@ const typeApp = new Vue({
   data: {
     loadedCardData: '',
     currentId: '',
-    nextId: '',
+    xcurrentId: '',
+    isSlide: false,
     cardInstance: [],
+    btnTypeScale: '',
+    btnNottypeScale: ''
   },
   created() {
     this.loadedCardData = returnApi
     vueBus.$on('onRelease',this.onRelease)
+    vueBus.$on('onAfterSwipe',this.onAfterSwipe)
+    vueBus.$on('onAfterSlide',this.onAfterSlide)
+    vueBus.$on('changeScale',this.changeScale)
   },
   computed: {
     cardList() {
@@ -354,56 +429,122 @@ const typeApp = new Vue({
     },
     cardWrap() {
       return this.$refs.cardWrap
+    },
+    btnScaleType() {
+      return {
+        'transform': `scale(${this.btnTypeScale})`
+      }
+    },
+    btnScaleNottype() {
+      return {
+        'transform': `scale(${this.btnNottypeScale})`
+      }
     }
   },
   mounted(){
     this.setCardList(this.cardList,'mount')
-    this.$nextTick(function(){
-    })
   },
   methods: {
     setCardList(data,lifeCycle) {
-      const vm = this
-      const cardWrap = vm.cardWrap
+      const cardWrap = this.cardWrap
       const isMount = (lifeCycle == 'mount')
-      data.forEach(function(d,i){
+      data.forEach( (ins,i) => {
         let cardItem = new CardItem()
         //cardItem.generateObj.id = d.id
-        cardItem.generateObj.src = d.src
-        cardItem.generateObj.label = d.label
+        cardItem.generateObj.src = ins.src
+        cardItem.generateObj.label = ins.label
         if (isMount) {
           if (i === 0) {
             cardItem.current = true
-            vm.currentId = cardItem.generateObj.id
+            this.currentId = cardItem.generateObj.id
           } else if (i === 1) {
             cardItem.next = true
-            vm.nextId = cardItem.generateObj.id
+            Vue.set(cardItem.setTransform,'scale',cardItem.cardModel.nextScale)
+          } else {
+            Vue.set(cardItem.setTransform,'scale',cardItem.cardModel.nextScale)
           }
+        } else {
+          Vue.set(cardItem.setTransform,'scale',cardItem.cardModel.nextScale)
         }
         cardItem.$mount()
         cardWrap.insertBefore(cardItem.$el,cardWrap.firstChild);
       })
     },
+    findObj(ins) {
+      const currentId = this.isSlide ? this.xcurrentId : this.currentId
+      return ins.generateObj.id === currentId
+    },
+    onAfterSwipe(current,next,duration) {
+      const cardInstance = this.cardInstance
+      const nextInstance = cardInstance[cardInstance.length - current]
+      const skipInstance = cardInstance[cardInstance.length - next]
+
+      nextInstance.next = false
+      nextInstance.current = true
+      Vue.set(nextInstance.setTransform, 'transition', duration)
+      Vue.set(nextInstance.setTransform, 'scale', 1)
+
+      this.currentId = nextInstance.generateObj.id
+      skipInstance.next = true
+      this.btnTypeScale = 1
+      this.btnNottypeScale = 1
+    },
+    onAfterSlide() {
+      const cardInstance = this.cardInstance
+      const currentInstance = cardInstance[cardInstance.length - 1]
+      const nextInstance = cardInstance[cardInstance.length - 2]
+      const skipInstance = cardInstance[cardInstance.length - 3]
+
+      console.log(currentInstance)
+      console.log(nextInstance)
+      console.log(skipInstance)
+
+      nextInstance.next = false
+      nextInstance.current = true
+      Vue.set(nextInstance.setTransform, 'transition', .7)
+      Vue.set(nextInstance.setTransform, 'scale', 1)
+      skipInstance.next = true
+
+      this.currentId = currentInstance.generateObj.id
+      console.log(this.currentId)
+
+    },
     onRelease(id) {
       const cardInstance = this.cardInstance
-      cardInstance.forEach(function(item, i){
-        if (item.generateObj.id === id) {
-          //console.log(item)
-          //console.log(i)
-          item.released = true
-          //item.$destroy()
-          cardInstance.splice(i,1)
+      return new Promise(resolve => {
+        const item = cardInstance.find(this.findObj)
+        const itemIndex = cardInstance.findIndex(this.findObj)
+        item.released = true
+        console.log(itemIndex)
+        /*
+        item.$el.parentNode.removeChild(item.$el)
+        item.$destroy()
+        cardInstance.splice(itemIndex,1)
+        if (cardInstance.length < 3) {
+          this.setCardList(returnApi2)
         }
+        */
+        resolve()
       })
-      if (cardInstance.length < 3) {
-        this.setCardList(returnApi2)
-      }
+    },
+    onButton(n) {
+      const cardInstance = this.cardInstance
+      const item = cardInstance.find(this.findObj)
+      item.type = n
+      item.slideType = n
+      Vue.set(item.setTransform,'overlayOpacity',item.cardModel.moveOpacity)
+      item.onSlide()
     },
     onType() {
-      //const card = this.cardInstance[this.currentId]
+      this.onButton(1)
     },
     onSkip() {
-
+      this.onButton(-1)
+    },
+    changeScale(obj) {
+      obj.type === 1
+      ? this.btnTypeScale = obj.scale
+      : this.btnNottypeScale = obj.scale
     }
   }
 })

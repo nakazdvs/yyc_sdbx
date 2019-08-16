@@ -6,7 +6,7 @@
   "scripts": {
     "scss:css": "node-sass --output-style expanded ./scss -o ./css",
     "prefix": "postcss -u autoprefixer --no-map ./css -r ./css",
-    "build": "yarn run scss:css & yarn run prefix"
+    "build": "yarn run scss:css && yarn run prefix"
   },
   "author": "",
   "license": "ISC",

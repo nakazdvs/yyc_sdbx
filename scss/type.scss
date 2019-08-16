@@ -32,8 +32,7 @@ a {
     overflow: hidden;
     transform-origin: center;
     transform: translate3d(0,0,0);
-    &::before {
-      content: "";
+    .overlay {
       display: block;
       position: absolute;
       top: 0;
@@ -41,19 +40,29 @@ a {
       width: 100%;
       height: 100%;
       transition: .1s;
+      &::before {
+        display: block;
+      }
     }
-    &.type::before {
-      content: "いいかも！";
-      font-size: 20px;
-      background-color: rgba(255,0,0,0.3);
+    &.type .overlay {
+      background-color: #f00;
+      &::before {
+        content: "いいかも！";
+        color: #fff;
+        font-size: 20px;
+      }
     }
-    &.nottype::before {
-      content: "いまいち…";
-      font-size: 20px;
-      background-color: rgba(51,51,51,0.3);
+    &.nottype .overlay {
+      background-color: #333;
+      &::before {
+        content: "いまいち…";
+        color: #fff;
+        font-size: 20px;
+        text-align: right;
+      }
     }
-    &.move_type {
-      animation: type 0.3s 0.3s ease-in-out forwards; 
+    &.slide_type {
+      animation: type 0.3s ease-in-out forwards; 
     }
     @keyframes type {
       0% {
@@ -61,6 +70,17 @@ a {
       }
       99.9%,to {
         transform: rotate(45deg)
+      }
+    }
+    &.slide_nottype {
+      animation: nottype 0.3s ease-in-out forwards; 
+    }
+    @keyframes nottype {
+      0% {
+        transform: rotate(0deg)
+      }
+      99.9%,to {
+        transform: rotate(-45deg)
       }
     }
     .photo {
