@@ -381,11 +381,19 @@ const CardItem = Vue.extend({
 
         //setTimeout(() => this.onRelease(),setTimeoutDuration )
         setTimeout(() => {
+          vueBus.$emit('onAfterSwipe',Card.swipedScaleDuration)
+          setTimeout(() => {
+            vueBus.$emit('onRelease')
+          },300)
+        },setTimeoutDuration)
+        /*
+        setTimeout(() => {
           (async () => {
             await vueBus.$emit('onRelease')
             vueBus.$emit('onAfterSwipe',Card.swipedScaleDuration)
           })()
         },setTimeoutDuration)
+        */
         
       } else {
         transform.translateX = 0
@@ -474,6 +482,21 @@ const typeApp = new Vue({
     },
     onAfterSwipe(duration) {
       const cardInstance = this.cardInstance
+      const currentInstance = cardInstance[cardInstance.length - 1]
+      const nextInstance = cardInstance[cardInstance.length - 2]
+      const skipInstance = cardInstance[cardInstance.length - 3]
+
+      nextInstance.next = false
+      nextInstance.current = true
+      Vue.set(nextInstance.setTransform, 'transition', duration)
+      Vue.set(nextInstance.setTransform, 'scale', 1)
+      skipInstance.next = true
+
+      this.currentId = currentInstance.generateObj.id
+      this.btnTypeScale = 1
+      this.btnNottypeScale = 1
+      /*
+      const cardInstance = this.cardInstance
       const nextInstance = cardInstance[cardInstance.length - 1]
       const skipInstance = cardInstance[cardInstance.length - 2]
 
@@ -486,6 +509,7 @@ const typeApp = new Vue({
       skipInstance.next = true
       this.btnTypeScale = 1
       this.btnNottypeScale = 1
+      */
     },
     onAfterSlide(duration) {
       const cardInstance = this.cardInstance
