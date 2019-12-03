@@ -176,7 +176,7 @@ const CardStyle = class {
 const CardItem = Vue.extend({
   template: `
     <div class="card"
-        :class="[setOrder,addClass,addSlideClass]"
+        :class="[setOrder,addClass,addSlideClass,addStop]"
         :data-id="generateObj.id"
         @touchstart.stop="onTouch"
         @touchmove.stop.prevent="onSwipe"
@@ -205,6 +205,7 @@ const CardItem = Vue.extend({
       next: false,
       type: '',
       slideType: '',
+      stop: true,
       clientData: {
         width: '',
         height: '',
@@ -230,7 +231,6 @@ const CardItem = Vue.extend({
         moveOpacity: 0.5,
         nextScale: 0.9,
         reminingNextScale: 0.1,
-        //preMaxScale: 0.95,
         relativeStartX: '',
         relativeStartY: '',
         movingDistance: '',
@@ -263,6 +263,11 @@ const CardItem = Vue.extend({
       return {
         'slide_type': this.slideType === 1,
         'slide_nottype': this.slideType === -1,
+      }
+    },
+    addStop() {
+      return {
+        'stop': this.stop
       }
     },
     transForm() {
@@ -352,7 +357,7 @@ const CardItem = Vue.extend({
       transform.overlayOpacity = setOpacity
 
     },
-    onSlide() {
+    onSlide(nextInstance) {
       const Card = this.cardModel
       const clientData = this.clientData
       const transform = this.setTransform
@@ -362,8 +367,8 @@ const CardItem = Vue.extend({
       vueBus.$emit('onAfterSlide',Card.slidedScaleDuration)
       this.$el.addEventListener('animationend',() => {
         vueBus.$emit('onRelease')
+        nextInstance.stop = false
       })
-      //setTimeout(() => this.onRelease(),200 )
     },
     onEnd(e) {
       const Card = this.cardModel
@@ -373,6 +378,7 @@ const CardItem = Vue.extend({
       transform.transition = Card.transitionDuration
       const setTimeoutDuration = Card.transitionDuration * 1000
       if (Card.movingDistance > clientData.quarterWidth) {
+
         const releaseMoveX = transform.translateX + (this.type === 1 ? Card.fallDistanceX : -Card.fallDistanceX)
         const releaseMoveY = transform.translateY + Card.fallDistanceY
         transform.translateX = releaseMoveX
@@ -383,15 +389,16 @@ const CardItem = Vue.extend({
         setTimeout(() => {
           vueBus.$emit('onAfterSwipe',Card.swipedScaleDuration)
           setTimeout(() => {
-            vueBus.$emit('onRelease')
+            //vueBus.$emit('onRelease')
+            (async () => {
+              await vueBus.$emit('onRelease')
+              this.nextInstance.stop = false
+            })()
           },300)
         },setTimeoutDuration)
         /*
         setTimeout(() => {
-          (async () => {
-            await vueBus.$emit('onRelease')
-            vueBus.$emit('onAfterSwipe',Card.swipedScaleDuration)
-          })()
+          
         },setTimeoutDuration)
         */
         
@@ -462,6 +469,7 @@ const typeApp = new Vue({
         if (isMount) {
           if (i === 0) {
             cardItem.current = true
+            cardItem.stop = false
             this.currentId = cardItem.generateObj.id
           } else if (i === 1) {
             cardItem.next = true
@@ -493,6 +501,7 @@ const typeApp = new Vue({
       skipInstance.next = true
 
       this.currentId = currentInstance.generateObj.id
+
       this.btnTypeScale = 1
       this.btnNottypeScale = 1
       /*
@@ -524,11 +533,10 @@ const typeApp = new Vue({
       skipInstance.next = true
 
       this.currentId = currentInstance.generateObj.id
-
     },
     onRelease(id) {
       const cardInstance = this.cardInstance
-      return new Promise(resolve => {
+      return new Promise( (resolve) => {
         const item = cardInstance.find(this.findObj)
         const itemIndex = cardInstance.findIndex(this.findObj)
         item.released = true
@@ -543,12 +551,13 @@ const typeApp = new Vue({
     },
     onButton(n) {
       const cardInstance = this.cardInstance
-      const item = cardInstance[cardInstance.length - 1]
-      Vue.set(item.setTransform,'transition',0)
-      item.type = n
-      item.slideType = n
-      Vue.set(item.setTransform,'overlayOpacity',item.cardModel.moveOpacity)
-      item.onSlide()
+      const currentInstance = cardInstance[cardInstance.length - 1]
+      const nextInstance = cardInstance[cardInstance.length - 2]
+      Vue.set(currentInstance.setTransform,'transition',0)
+      currentInstance.type = n
+      currentInstance.slideType = n
+      Vue.set(currentInstance.setTransform,'overlayOpacity',currentInstance.cardModel.moveOpacity)
+      currentInstance.onSlide(nextInstance)
     },
     onType() {
       this.onButton(1)

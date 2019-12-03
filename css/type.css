@@ -32,12 +32,15 @@ a {
   height: 105.1vw;
   border-radius: 8px;
   background-color: #fff;
-  box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.26);
   overflow: hidden;
   -webkit-transform-origin: center;
           transform-origin: center;
   -webkit-transform: translate3d(0, 0, 0);
           transform: translate3d(0, 0, 0);
+}
+
+#cardUI .card.next, #cardUI .card.current {
+  box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.26);
 }
 
 #cardUI .card .overlay {
@@ -128,6 +131,10 @@ a {
     -webkit-transform: rotate(-45deg);
             transform: rotate(-45deg);
   }
+}
+
+#cardUI .card.stop {
+  pointer-events: none;
 }
 
 #cardUI .card .photo {
